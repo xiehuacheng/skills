@@ -4,8 +4,6 @@ const os = require('os');
 
 const CACHE_DIR = path.join(os.homedir(), '.cache', 'skills-trending');
 const CACHE_FILE = path.join(CACHE_DIR, 'cache.json');
-const SITEMAP_CACHE_FILE = path.join(CACHE_DIR, 'sitemap_urls.json');
-const SITEMAP_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
 const DEFAULT_TTL_MS = 60 * 60 * 1000; // 1 hour
 
 function ensureDir(dir) {
@@ -57,33 +55,9 @@ function getPreviousData() {
   return cache && cache.data ? cache.data : null;
 }
 
-function getCachedSitemapUrls(forceRefresh = false) {
-  if (forceRefresh || !fs.existsSync(SITEMAP_CACHE_FILE)) {
-    return null;
-  }
-  try {
-    const cache = JSON.parse(fs.readFileSync(SITEMAP_CACHE_FILE, 'utf8'));
-    if (isExpired(cache, SITEMAP_TTL_MS)) return null;
-    return cache.data;
-  } catch (err) {
-    console.error('Failed to read sitemap cache:', err.message);
-    return null;
-  }
-}
-
-function saveCachedSitemapUrls(urls) {
-  ensureDir(CACHE_DIR);
-  fs.writeFileSync(SITEMAP_CACHE_FILE, JSON.stringify({
-    timestamp: Date.now(),
-    data: urls
-  }, null, 2));
-}
-
 module.exports = {
   getCachedData,
   saveCachedData,
   getPreviousData,
-  DEFAULT_TTL_MS,
-  getCachedSitemapUrls,
-  saveCachedSitemapUrls
+  DEFAULT_TTL_MS
 };

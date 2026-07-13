@@ -84,14 +84,14 @@ async function fetchAllData() {
   // Await agentskills first because skills-rank detail fetch needs the repo list.
   const agentskills = await agentskillsPromise;
 
-  console.error('Fetching data from skills-rank.com (leaderboard pages)...');
+  console.error('Fetching data from skills-rank.com leaderboard API...');
   const skillsrankPromise = parseSkillsRank().catch(err => {
     console.error('skills-rank.com failed:', err.message);
     return [];
   });
 
-  console.error('Fetching data from skills-rank.com (sitemap detail pages for top repos)...');
-  const skillsrankDetailsPromise = parseSkillsRankDetails(agentskills, { maxRepos: 20 }).catch(err => {
+  console.error('Fetching data from skills-rank.com search API (top repos)...');
+  const skillsrankDetailsPromise = parseSkillsRankDetails(agentskills, { maxRepos: 40 }).catch(err => {
     console.error('skills-rank.com detail fetch failed:', err.message);
     return [];
   });
