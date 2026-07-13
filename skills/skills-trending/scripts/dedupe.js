@@ -78,16 +78,15 @@ function calculateHotScore(item) {
   const hasStars = item.stars > 0;
   const hasInstalls = installs > 0;
 
-  // Default: balance GitHub popularity with real-world usage.
-  // Installs are weighted slightly higher because they reflect actual adoption.
-  let weights = { stars: 0.45, installs: 0.55 };
+  // Weight GitHub popularity slightly higher than real-world usage.
+  let weights = { stars: 0.6, installs: 0.4 };
 
   // Redistribute weights when a metric is missing
   if (!hasStars || !hasInstalls) {
-    const total = (hasStars ? 0.45 : 0) + (hasInstalls ? 0.55 : 0);
+    const total = (hasStars ? 0.6 : 0) + (hasInstalls ? 0.4 : 0);
     weights = {
-      stars: hasStars ? 0.45 / total : 0,
-      installs: hasInstalls ? 0.55 / total : 0
+      stars: hasStars ? 0.6 / total : 0,
+      installs: hasInstalls ? 0.4 / total : 0
     };
   }
 
