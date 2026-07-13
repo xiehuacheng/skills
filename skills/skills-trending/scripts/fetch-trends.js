@@ -156,8 +156,10 @@ function applyAggregatedInstalls(agentskills, repoInstallsMap) {
     if (isRepoLevel && repoInstallsMap.has(repoKey)) {
       return {
         ...item,
+        skill_id: item.skill_id || `${item.full_name}@${item.name}`,
         installs: repoInstallsMap.get(repoKey),
-        install_source: 'skills-rank.com (aggregated from individual skills)'
+        install_source: 'skills-rank.com (aggregated from individual skills)',
+        sources: Array.from(new Set([...(item.sources || [item.source]), 'skills-rank.com']))
       };
     }
     return item;

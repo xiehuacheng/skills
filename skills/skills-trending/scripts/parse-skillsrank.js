@@ -1,11 +1,16 @@
 const SKILLS_RANK_API = 'https://skills-rank.com/api';
 const DEFAULT_LEADERBOARD_ITEMS = 150;
 const DEFAULT_DETAIL_REPOS = 30;
-const DETAIL_CONCURRENCY = 5;
-const DETAIL_DELAY_MS = 100;
-const REQUEST_TIMEOUT_MS = 15_000;
+const DETAIL_CONCURRENCY = 2;
+const DETAIL_DELAY_MS = 300;
+const REQUEST_TIMEOUT_MS = 30_000;
+const MAX_RETRIES = 2;
 
-async function fetchJson(url, options = {}) {
+async function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function fetchJson(url, options = {}, retries = MAX_RETRIES) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
   try {
@@ -24,6 +29,12 @@ async function fetchJson(url, options = {}) {
     return response.json();
   } catch (err) {
     clearTimeout(timeout);
+    if (retries > 0) {
+      const delay = 800 * (MAX_RETRIES - retries + 1);
+      console.error(`  Retry ${MAX_RETRIES - retries + 1}/${MAX_RETRIES} for ${url} (${err.message})`);
+      await sleep(delay);
+      return fetchJson(url, options, retries - 1);
+    }
     throw err;
   }
 }
@@ -122,9 +133,14 @@ async function searchSkillsForRepo(repoFullName) {
 
     if (!data || !Array.isArray(data.data)) return [];
 
-    // Filter to exact owner/repo matches
+    // Filter to exact owner/repo matches (case-insensitive because repo names
+    // may differ in capitalization between agentskills.media and skills-rank.com).
     return data.data
-      .filter(item => item.owner === owner && item.repo === repo)
+      .filter(item =>
+        item.owner && item.repo &&
+        item.owner.toLowerCase() === owner.toLowerCase() &&
+        item.repo.toLowerCase() === repo.toLowerCase()
+      )
       .map(item => normalizeApiItem(item));
   } catch (err) {
     console.error(`Search failed for ${repoFullName}:`, err.message);

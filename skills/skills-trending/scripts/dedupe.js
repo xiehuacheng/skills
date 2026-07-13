@@ -21,6 +21,10 @@ function mergeCategories(categoriesA, categoriesB) {
   return Array.from(set);
 }
 
+function getRepoKey(fullName) {
+  return String(fullName || '').toLowerCase().trim();
+}
+
 function dedupeAndMerge(items) {
   const map = new Map();
 
@@ -56,7 +60,38 @@ function dedupeAndMerge(items) {
     }
   }
 
-  return Array.from(map.values());
+  const merged = Array.from(map.values());
+
+  // Repo-level fallback: some sources list a GitHub repo as a single skill
+  // (e.g. agentskills.media's `affaan-m/ECC@ECC`), while skills-rank.com lists
+  // individual skills inside the same repo (e.g. `affaan-m/ecc@security-scan`).
+  // When a repo-level skill has no installs, borrow the highest installs found
+  // for any skill in that repo.
+  const repoMaxInstalls = new Map();
+  for (const item of merged) {
+    const repoKey = getRepoKey(item.full_name);
+    if (!repoKey) continue;
+    const installs = item.installs || item.rank_score || 0;
+    if (installs > 0 && installs > (repoMaxInstalls.get(repoKey) || 0)) {
+      repoMaxInstalls.set(repoKey, installs);
+    }
+  }
+
+  for (const item of merged) {
+    const hasInstalls = (item.installs || item.rank_score || 0) > 0;
+    if (hasInstalls) continue;
+
+    const repoKey = getRepoKey(item.full_name);
+    const fallbackInstalls = repoKey ? repoMaxInstalls.get(repoKey) : undefined;
+    if (fallbackInstalls && fallbackInstalls > 0) {
+      item.installs = fallbackInstalls;
+      if (!item.sources.includes('skills-rank.com')) {
+        item.sources.push('skills-rank.com');
+      }
+    }
+  }
+
+  return merged;
 }
 
 function logScore(value, max) {
