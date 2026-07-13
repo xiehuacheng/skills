@@ -134,6 +134,36 @@ function enrichWithRepoStars(items, repoStarsMap) {
   });
 }
 
+function aggregateRepoInstalls(detailItems) {
+  // Sum installs of all individual skills under the same repo.
+  // This allows repo-level skills (e.g. obra/superpowers@superpowers) to show
+  // the combined install count of the whole repository.
+  const map = new Map();
+  for (const item of detailItems) {
+    if (!item.installs) continue;
+    const repoKey = (item.full_name || item.id || '').toLowerCase();
+    if (!repoKey) continue;
+    map.set(repoKey, (map.get(repoKey) || 0) + item.installs);
+  }
+  return map;
+}
+
+function applyAggregatedInstalls(agentskills, repoInstallsMap) {
+  return agentskills.map(item => {
+    const repoKey = (item.full_name || item.id || '').toLowerCase();
+    // Only apply to repo-level skills where the skill name equals the repo name
+    const isRepoLevel = item.name && item.repo && item.name === item.repo;
+    if (isRepoLevel && repoInstallsMap.has(repoKey)) {
+      return {
+        ...item,
+        installs: repoInstallsMap.get(repoKey),
+        install_source: 'skills-rank.com (aggregated from individual skills)'
+      };
+    }
+    return item;
+  });
+}
+
 const CATEGORY_ALIASES = {
   frontend: ['Web Dev', 'UI/UX'],
   ui: ['UI/UX', 'Web Dev'],
@@ -225,8 +255,12 @@ async function main() {
     const enrichedSkillsRankDetails = enrichWithRepoStars(fetched.skillsrankDetails, repoStarsMap);
     const enrichedSkillsSh = enrichWithRepoStars(fetched.skillssh, repoStarsMap);
 
+    // Aggregate installs from individual skill details back to repo-level skills.
+    const repoInstallsMap = aggregateRepoInstalls(enrichedSkillsRankDetails);
+    const enrichedAgentskills = applyAggregatedInstalls(fetched.agentskills, repoInstallsMap);
+
     const allItems = [
-      ...fetched.agentskills,
+      ...enrichedAgentskills,
       ...enrichedSkillsRank,
       ...enrichedSkillsRankDetails,
       ...enrichedSkillsSh
