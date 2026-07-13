@@ -1,6 +1,6 @@
 # Orange_Skills
 
-一个面向 AI 编程助手（Claude Code、Codex、Cursor、Kimi Code 等）的 Agent Skills 集合仓库。仓库采用多 skill 结构，每个 skill 独立存放在 `skills/<skill-name>/` 目录下，遵循 [Agent Skills 规范](https://agentskills.io/)。
+一个 Agent Skills 技能集合仓库，将各领域经验打包为可复用的 AI 能力。每个 skill 独立存放在 `skills/<skill-name>/` 目录下，遵循 [Agent Skills 规范](https://agentskills.io/)。
 
 ## 当前可用的 Skills
 
@@ -49,7 +49,7 @@ node skills/skills-trending/scripts/fetch-trends.js --refresh --json
 ## 项目特点
 
 - **多 skill 仓库结构**：方便后续不断扩展新的 skills
-- **即装即用**：通过 `npx skills add` 一键安装到常用 AI 编码助手
+- **即装即用**：通过 `npx skills add` 一键安装到常用 AI agent
 - **数据来源多元**：聚合 GitHub stars、安装量、排行榜等多种信号
 - **结果去重合并**：按 `owner/repo@skill-name` 精确去重，合并多源指标
 
