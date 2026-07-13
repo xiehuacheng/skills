@@ -80,26 +80,49 @@ async function fetchAllData() {
     console.error('agentskills.media failed:', err.message);
     return [];
   });
-  
+
   console.error('Fetching data from skills-rank.com...');
   const skillsrankPromise = parseSkillsRank().catch(err => {
     console.error('skills-rank.com failed:', err.message);
     return [];
   });
-  
+
   console.error('Fetching data from skills.sh (this may take a while)...');
   const skillsshPromise = parseSkillsSh().catch(err => {
     console.error('skills.sh failed:', err.message);
     return [];
   });
-  
+
   const [agentskills, skillsrank, skillssh] = await Promise.all([
     agentskillsPromise,
     skillsrankPromise,
     skillsshPromise
   ]);
-  
+
   return { agentskills, skillsrank, skillssh };
+}
+
+function buildRepoStarsMap(agentskills) {
+  // agentskills.media reports stars at the repo level. Build a lookup so that
+  // individual skills from skills-rank.com / skills.sh can inherit the repo's stars.
+  const map = new Map();
+  for (const item of agentskills) {
+    const repoKey = (item.full_name || item.id || '').toLowerCase();
+    if (repoKey && item.stars && item.stars > 0) {
+      map.set(repoKey, item.stars);
+    }
+  }
+  return map;
+}
+
+function enrichWithRepoStars(items, repoStarsMap) {
+  return items.map(item => {
+    const repoKey = (item.full_name || item.id || '').toLowerCase();
+    if (!item.stars && repoKey && repoStarsMap.has(repoKey)) {
+      return { ...item, stars: repoStarsMap.get(repoKey) };
+    }
+    return item;
+  });
 }
 
 const CATEGORY_ALIASES = {
@@ -185,7 +208,14 @@ async function main() {
   
   if (!data) {
     const fetched = await fetchAllData();
-    const allItems = [...fetched.agentskills, ...fetched.skillsrank, ...fetched.skillssh];
+
+    // Inherit repo-level stars from agentskills.media for individual skills
+    // that only have install counts from skills-rank.com or skills.sh.
+    const repoStarsMap = buildRepoStarsMap(fetched.agentskills);
+    const enrichedSkillsRank = enrichWithRepoStars(fetched.skillsrank, repoStarsMap);
+    const enrichedSkillsSh = enrichWithRepoStars(fetched.skillssh, repoStarsMap);
+
+    const allItems = [...fetched.agentskills, ...enrichedSkillsRank, ...enrichedSkillsSh];
     data = sortByHotScore(dedupeAndMerge(allItems));
     saveCachedData(data);
     sourceInfo = {

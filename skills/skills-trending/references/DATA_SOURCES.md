@@ -30,4 +30,5 @@
 
 - Data from all sources is cached locally for 1 hour by default to avoid rate limits.
 - A skill's "hot score" is a log-scaled weighted combination of GitHub stars and install counts.
+- Skills from `skills-rank.com` and `skills.sh` inherit repo-level stars from `agentskills.media` when available, so individual skills can have both metrics.
 - Some skills may appear in multiple sources with slightly different names; we normalize by `owner/repo@skill-name`.
