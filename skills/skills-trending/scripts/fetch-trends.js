@@ -1,5 +1,5 @@
 const { parseAgentskills } = require('./parse-agentskills');
-const { parseSkillsRank } = require('./parse-skillsrank');
+const { parseSkillsRank, parseSkillsRankDetails } = require('./parse-skillsrank');
 const { parseSkillsSh } = require('./parse-skillssh');
 const { dedupeAndMerge, sortByHotScore } = require('./dedupe');
 const { getCachedData, saveCachedData } = require('./cache');
@@ -81,9 +81,18 @@ async function fetchAllData() {
     return [];
   });
 
-  console.error('Fetching data from skills-rank.com...');
+  // Await agentskills first because skills-rank detail fetch needs the repo list.
+  const agentskills = await agentskillsPromise;
+
+  console.error('Fetching data from skills-rank.com (leaderboard pages)...');
   const skillsrankPromise = parseSkillsRank().catch(err => {
     console.error('skills-rank.com failed:', err.message);
+    return [];
+  });
+
+  console.error('Fetching data from skills-rank.com (sitemap detail pages for top repos)...');
+  const skillsrankDetailsPromise = parseSkillsRankDetails(agentskills, { maxRepos: 20 }).catch(err => {
+    console.error('skills-rank.com detail fetch failed:', err.message);
     return [];
   });
 
@@ -93,13 +102,13 @@ async function fetchAllData() {
     return [];
   });
 
-  const [agentskills, skillsrank, skillssh] = await Promise.all([
-    agentskillsPromise,
+  const [skillsrank, skillsrankDetails, skillssh] = await Promise.all([
     skillsrankPromise,
+    skillsrankDetailsPromise,
     skillsshPromise
   ]);
 
-  return { agentskills, skillsrank, skillssh };
+  return { agentskills, skillsrank, skillsrankDetails, skillssh };
 }
 
 function buildRepoStarsMap(agentskills) {
@@ -213,15 +222,22 @@ async function main() {
     // that only have install counts from skills-rank.com or skills.sh.
     const repoStarsMap = buildRepoStarsMap(fetched.agentskills);
     const enrichedSkillsRank = enrichWithRepoStars(fetched.skillsrank, repoStarsMap);
+    const enrichedSkillsRankDetails = enrichWithRepoStars(fetched.skillsrankDetails, repoStarsMap);
     const enrichedSkillsSh = enrichWithRepoStars(fetched.skillssh, repoStarsMap);
 
-    const allItems = [...fetched.agentskills, ...enrichedSkillsRank, ...enrichedSkillsSh];
+    const allItems = [
+      ...fetched.agentskills,
+      ...enrichedSkillsRank,
+      ...enrichedSkillsRankDetails,
+      ...enrichedSkillsSh
+    ];
     data = sortByHotScore(dedupeAndMerge(allItems));
     saveCachedData(data);
     sourceInfo = {
       fromCache: false,
       agentskills: fetched.agentskills.length,
       skillsrank: fetched.skillsrank.length,
+      skillsrankDetails: fetched.skillsrankDetails.length,
       skillssh: fetched.skillssh.length,
       total: data.length
     };
@@ -254,7 +270,7 @@ async function main() {
   if (sourceInfo.fromCache) {
     output += `> Data loaded from cache. Use \`--refresh\` to fetch latest.\n\n`;
   } else {
-    output += `> Sources: agentskills.media (${sourceInfo.agentskills}), skills-rank.com (${sourceInfo.skillsrank}), skills.sh (${sourceInfo.skillssh}). Total unique: ${sourceInfo.total}\n\n`;
+    output += `> Sources: agentskills.media (${sourceInfo.agentskills}), skills-rank.com leaderboard (${sourceInfo.skillsrank}), skills-rank.com details (${sourceInfo.skillsrankDetails}), skills.sh (${sourceInfo.skillssh}). Total unique: ${sourceInfo.total}\n\n`;
   }
   
   if (options.category) {

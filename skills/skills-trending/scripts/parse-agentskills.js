@@ -1,11 +1,38 @@
+const { execSync } = require('child_process');
+
 const AGENTSKILLS_DATA_URL = 'https://raw.githubusercontent.com/jaychempan/Agent-Leaderboard/main/data/data.json';
+const FETCH_TIMEOUT_MS = 30_000;
+
+function fetchWithCurl() {
+  try {
+    const output = execSync(`curl -sL --max-time 90 "${AGENTSKILLS_DATA_URL}"`, {
+      encoding: 'utf8',
+      timeout: 120_000,
+      maxBuffer: 10 * 1024 * 1024, // 10MB
+      stdio: ['pipe', 'pipe', 'pipe']
+    });
+    return JSON.parse(output);
+  } catch (err) {
+    throw new Error(`agentskills.media curl fetch failed: ${err.message}`);
+  }
+}
 
 async function fetchAgentskills() {
-  const response = await fetch(AGENTSKILLS_DATA_URL);
-  if (!response.ok) {
-    throw new Error(`agentskills.media fetch failed: ${response.status}`);
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+
+  try {
+    const response = await fetch(AGENTSKILLS_DATA_URL, { signal: controller.signal });
+    clearTimeout(timeout);
+    if (!response.ok) {
+      throw new Error(`agentskills.media fetch failed: ${response.status}`);
+    }
+    return response.json();
+  } catch (err) {
+    clearTimeout(timeout);
+    console.error(`Native fetch failed (${err.message}), falling back to curl...`);
+    return fetchWithCurl();
   }
-  return response.json();
 }
 
 function normalizeCategory(category, useCases = []) {
