@@ -1,9 +1,9 @@
 ---
-name: skills-trending
-description: Discover trending and hot Agent Skills across multiple leaderboards (agentskills.media, skills-rank.com, skills.sh). Summarize, categorize, and compare rankings. Use when the user asks about popular skills, hot skills, or wants to find skills by category.
+name: hot-skills
+description: Discover hot and trending Agent Skills across multiple leaderboards (agentskills.media, skills-rank.com, skills.sh). Summarize, categorize, and search. Use when the user asks about popular skills, hot skills, trending skills, or wants to find skills by category.
 ---
 
-# Skills Trending
+# Hot Skills
 
 This skill helps you discover trending and hot Agent Skills by aggregating data from multiple sources:
 

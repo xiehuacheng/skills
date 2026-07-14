@@ -259,7 +259,7 @@ async function main() {
       return;
     }
 
-    let output = `# Agent Skills Trending Report\n\n`;
+    let output = `# Agent Hot Skills Report\n\n`;
     output += `*Generated at ${new Date().toLocaleString()}*\n\n`;
     if (sourceInfo.fromCache) {
       output += `> Data loaded from cache. Use \`--refresh\` to fetch latest.\n\n`;
@@ -330,7 +330,7 @@ async function main() {
     return;
   }
   
-  let output = `# Agent Skills Trending Report\n\n`;
+  let output = `# Agent Hot Skills Report\n\n`;
   output += `*Generated at ${new Date().toLocaleString()}*\n\n`;
   
   if (sourceInfo.fromCache) {
