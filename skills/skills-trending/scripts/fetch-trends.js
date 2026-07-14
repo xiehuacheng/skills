@@ -84,30 +84,30 @@ Examples:
 }
 
 async function fetchAllData() {
-  console.error('Fetching data from agentskills.media...');
+  console.error('Fetching data from agentskills.media, skills-rank.com leaderboard, and skills.sh in parallel...');
+
+  // These three sources are independent; start them concurrently.
   const agentskillsPromise = parseAgentskills().catch(err => {
     console.error('agentskills.media failed:', err.message);
     return [];
   });
 
-  // Await agentskills first because skills-rank detail fetch needs the repo list.
-  const agentskills = await agentskillsPromise;
-
-  console.error('Fetching data from skills-rank.com leaderboard API...');
   const skillsrankPromise = parseSkillsRank().catch(err => {
     console.error('skills-rank.com failed:', err.message);
     return [];
   });
 
-  console.error('Fetching data from skills-rank.com search API (top repos)...');
-  const skillsrankDetailsPromise = parseSkillsRankDetails(agentskills, { maxRepos: 40 }).catch(err => {
-    console.error('skills-rank.com detail fetch failed:', err.message);
+  const skillsshPromise = parseSkillsSh().catch(err => {
+    console.error('skills.sh failed:', err.message);
     return [];
   });
 
-  console.error('Fetching data from skills.sh (this may take a while)...');
-  const skillsshPromise = parseSkillsSh().catch(err => {
-    console.error('skills.sh failed:', err.message);
+  // skills-rank.com detail fetch needs the repo list from agentskills.media.
+  const agentskills = await agentskillsPromise;
+
+  console.error('Fetching data from skills-rank.com search API (top repos)...');
+  const skillsrankDetailsPromise = parseSkillsRankDetails(agentskills, { maxRepos: 40 }).catch(err => {
+    console.error('skills-rank.com detail fetch failed:', err.message);
     return [];
   });
 
