@@ -1,12 +1,14 @@
 const { parseAgentskills } = require('./parse-agentskills');
 const { parseSkillsRank, parseSkillsRankDetails } = require('./parse-skillsrank');
 const { parseSkillsSh } = require('./parse-skillssh');
+const { parseSkillsShTrending } = require('./parse-skillssh-trending');
 const { dedupeAndMerge, sortByHotScore } = require('./dedupe');
 const { getCachedData, saveCachedData } = require('./cache');
 const {
   formatTopTable,
   formatByCategory,
-  formatSearchResults
+  formatSearchResults,
+  formatNumber
 } = require('./format');
 
 function parseArgs() {
@@ -15,6 +17,7 @@ function parseArgs() {
     top: 20,
     category: null,
     search: null,
+    trending: false,
     refresh: false,
     json: false
   };
@@ -33,6 +36,10 @@ function parseArgs() {
       case '--search':
       case '-s':
         options.search = args[++i];
+        break;
+      case '--trending':
+      case '-t':
+        options.trending = true;
         break;
       case '--refresh':
       case '-r':
@@ -61,6 +68,7 @@ Options:
   --top, -n <number>        Number of top skills to show (default: 20)
   --category, -c <category> Filter by category (e.g., frontend, testing, security)
   --search, -s <query>      Search skills by keyword
+  --trending, -t            Show skills.sh 24h trending (headless browser)
   --refresh, -r             Force refresh data (ignore cache)
   --json, -j                Output raw JSON instead of markdown
   --help, -h                Show this help
@@ -70,6 +78,7 @@ Examples:
   node scripts/fetch-trends.js --top 10
   node scripts/fetch-trends.js --category frontend
   node scripts/fetch-trends.js --search "react testing"
+  node scripts/fetch-trends.js --trending --top 20
   node scripts/fetch-trends.js --refresh --json
 `);
 }
@@ -260,12 +269,78 @@ function filterBySearch(items, query) {
   });
 }
 
+async function enrichTrendingWithStars(trendingItems) {
+  console.error('Fetching agentskills.media stars for trending items...');
+  const agentskills = await parseAgentskills().catch(err => {
+    console.error('agentskills.media failed:', err.message);
+    return [];
+  });
+
+  const repoStarsMap = buildRepoStarsMap(agentskills);
+  return trendingItems.map(item => {
+    const repoKey = (item.full_name || '').toLowerCase();
+    const stars = repoStarsMap.get(repoKey) || 0;
+    return { ...item, stars };
+  });
+}
+
+function formatTrendingTable(items, topN = 20) {
+  const topItems = items.slice(0, topN);
+
+  let output = `## Top ${topN} skills.sh Trending (24h)\n\n`;
+  output += '| Rank | Skill | Stars | 24h Installs | Source |\n';
+  output += '|-----:|------|------:|-------------:|:-------|\n';
+
+  topItems.forEach((item, index) => {
+    const rank = item.rank || index + 1;
+    const name = item.skill_id || `${item.full_name}@${item.name}` || item.full_name || item.name;
+    const stars = formatNumber(item.stars);
+    const installs = formatNumber(item.installs);
+    output += `| ${rank} | \`${name}\` | ${stars} | ${installs} | skills.sh |\n`;
+  });
+
+  return output;
+}
+
 async function main() {
   const options = parseArgs();
-  
+
+  if (options.trending) {
+    let data = getCachedData(options.refresh);
+    let sourceInfo = { fromCache: true, trending: true };
+
+    if (!data || !Array.isArray(data) || data.length === 0 || !data[0].rank) {
+      const trendingItems = await parseSkillsShTrending();
+      data = await enrichTrendingWithStars(trendingItems);
+      saveCachedData(data);
+      sourceInfo = { fromCache: false, trending: true, total: data.length };
+    }
+
+    const filteredData = options.search ? filterBySearch(data, options.search) : data;
+
+    if (options.json) {
+      console.log(JSON.stringify({
+        meta: { ...sourceInfo, timestamp: new Date().toISOString() },
+        items: filteredData.slice(0, options.top)
+      }, null, 2));
+      return;
+    }
+
+    let output = `# Agent Skills Trending Report\n\n`;
+    output += `*Generated at ${new Date().toLocaleString()}*\n\n`;
+    if (sourceInfo.fromCache) {
+      output += `> Data loaded from cache. Use \`--refresh\` to fetch latest.\n\n`;
+    } else {
+      output += `> Source: skills.sh 24h trending leaderboard (${sourceInfo.total} skills).\n\n`;
+    }
+    output += formatTrendingTable(filteredData, options.top);
+    console.log(output);
+    return;
+  }
+
   let data = getCachedData(options.refresh);
   let sourceInfo = { fromCache: true };
-  
+
   if (!data) {
     const fetched = await fetchAllData();
 
