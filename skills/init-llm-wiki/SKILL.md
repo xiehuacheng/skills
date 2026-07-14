@@ -1,9 +1,9 @@
 ---
-name: init-agent-wiki
-description: 根据指定领域，初始化并维护一个 Obsidian 优先、兼容 Google Cloud OKF 0.1 的 Karpathy 式 LLM wiki。
+name: init-llm-wiki
+description: 根据指定领域，初始化并维护一个 Obsidian 优先、兼容 Google Cloud OKF 0.1 的 Karpathy 式 LLM Wiki。
 ---
 
-# 构建 Agent Wiki
+# 构建 LLM Wiki
 
 帮助用户构建一个 Karpathy 风格的 LLM wiki，并遵循 Google Cloud Open Knowledge Format（OKF）v0.1 规范。
 
@@ -23,7 +23,7 @@ description: 根据指定领域，初始化并维护一个 Obsidian 优先、兼
 安装完成后，在支持的 agent 环境中输入（例如 Claude Code）：
 
 ```text
-/init-agent-wiki
+/init-llm-wiki
 ```
 
 Agent 会询问你想构建哪个领域的 wiki，然后自动完成初始化。
@@ -212,7 +212,7 @@ wiki/
 
 ## 升级与迁移
 
-当 `init-wiki` skill 本身有重大更新（如 Ingest 流程调整、目录约定变化）时，已经用旧版 skill 初始化的 wiki 项目不会自动更新。主会话应：
+当 `init-llm-wiki` skill 本身有重大更新（如 Ingest 流程调整、目录约定变化）时，已经用旧版 skill 初始化的 wiki 项目不会自动更新。主会话应：
 
 1. **同步 `WORKFLOWS.md`**：将项目根目录的 `WORKFLOWS.md` 与当前 skill 模板对齐。这是项目级文件，skill 更新不会自动覆盖。
 2. **同步 `CLAUDE.md` / `AGENTS.md`**：把 schema 文档中的过时约定（如目录结构、frontmatter 规则、工作流程）更新到最新版本。
