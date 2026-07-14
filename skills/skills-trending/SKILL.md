@@ -9,7 +9,7 @@ This skill helps you discover trending and hot Agent Skills by aggregating data 
 
 - **agentskills.media** — GitHub stars and categories
 - **skills-rank.com** — Individual skill ranking scores
-- **skills.sh** — Real install counts
+- **skills.sh** — Real install counts (fetched via headless browser from the public leaderboard)
 
 ## When to Use
 
@@ -109,5 +109,5 @@ Replace `<Skill>` with the value shown in the `Skill` column (e.g. `obra/superpo
 - If data seems stale, add `--refresh`.
 - Category filtering supports partial matches and aliases (e.g., `--category frontend` matches "Web Dev" and "UI/UX").
 - Use specific keywords when searching: `--search "react testing"` works better than `--search testing`.
-- The first `--refresh` may take 30–60 seconds because data is fetched from several upstream APIs.
-- `--trending` requires the Python/Playwright environment; other commands do not.
+- The first `--refresh` may take 30–60 seconds because data is fetched from several upstream sources (including a headless browser pass for skills.sh).
+- `--trending` and the default top-skills fetch both require the Python/Playwright environment for skills.sh data.

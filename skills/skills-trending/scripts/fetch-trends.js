@@ -147,14 +147,18 @@ function aggregateRepoInstalls(detailItems) {
   // Sum installs of all skills under the same repo.
   // This allows repo-level skills (e.g. obra/superpowers@superpowers) to show
   // the combined install count of the whole repository.
-  const map = new Map();
+  const installs = new Map();
+  const sources = new Map();
   for (const item of detailItems) {
     if (!item.installs) continue;
     const repoKey = (item.full_name || item.id || '').toLowerCase();
     if (!repoKey) continue;
-    map.set(repoKey, (map.get(repoKey) || 0) + item.installs);
+    installs.set(repoKey, (installs.get(repoKey) || 0) + item.installs);
+    const repoSources = sources.get(repoKey) || new Set();
+    if (item.source) repoSources.add(item.source);
+    sources.set(repoKey, repoSources);
   }
-  return map;
+  return { installs, sources };
 }
 
 function findReposMissingInstalls(agentskills, repoInstallsMap, searchedRepoKeys, options = {}) {
@@ -176,18 +180,22 @@ function findReposMissingInstalls(agentskills, repoInstallsMap, searchedRepoKeys
     .slice(0, maxRepos);
 }
 
-function applyAggregatedInstalls(agentskills, repoInstallsMap) {
+function applyAggregatedInstalls(agentskills, repoInstalls) {
+  const { installs: repoInstallsMap, sources: repoSourcesMap } = repoInstalls;
   return agentskills.map(item => {
     const repoKey = (item.full_name || item.id || '').toLowerCase();
     // Only apply to repo-level skills where the skill name equals the repo name
     const isRepoLevel = item.name && item.repo && item.name === item.repo;
     if (isRepoLevel && repoInstallsMap.has(repoKey)) {
+      const contributingSources = Array.from(repoSourcesMap.get(repoKey) || new Set());
       return {
         ...item,
         skill_id: item.skill_id || `${item.full_name}@${item.name}`,
         installs: repoInstallsMap.get(repoKey),
-        install_source: 'skills-rank.com (aggregated from individual skills)',
-        sources: Array.from(new Set([...(item.sources || [item.source]), 'skills-rank.com']))
+        install_source: contributingSources.length
+          ? `aggregated from ${contributingSources.join(' / ')}`
+          : 'aggregated from individual skills',
+        sources: Array.from(new Set([...(item.sources || [item.source]), ...contributingSources]))
       };
     }
     return item;
@@ -253,18 +261,18 @@ async function main() {
     const enrichedSkillsSh = enrichWithRepoStars(fetched.skillssh, repoStarsMap);
 
     // Aggregate installs from individual skill details back to repo-level skills.
-    let repoInstallsMap = aggregateRepoInstalls([
+    let repoInstalls = aggregateRepoInstalls([
       ...enrichedSkillsRankDetails,
       ...enrichedSkillsSh
     ]);
-    let enrichedAgentskills = applyAggregatedInstalls(fetched.agentskills, repoInstallsMap);
+    let enrichedAgentskills = applyAggregatedInstalls(fetched.agentskills, repoInstalls);
 
     // Fallback: directly search high-starred repos that still lack installs.
     // The initial passes may miss some repos, and skills-rank.com search
     // can find installs for them even when they are not in the leaderboards.
     const missingRepos = findReposMissingInstalls(
       enrichedAgentskills,
-      repoInstallsMap,
+      repoInstalls.installs,
       searchedRepoKeys,
       { minStars: 10_000, maxRepos: 20 }
     );
@@ -273,11 +281,11 @@ async function main() {
       console.error(`Searching skills-rank.com for ${missingRepos.length} repos still missing installs...`);
       const missingDetails = await parseSkillsRankDetails(missingRepos, { maxRepos: missingRepos.length });
       enrichedSkillsRankDetails = enrichedSkillsRankDetails.concat(missingDetails);
-      repoInstallsMap = aggregateRepoInstalls([
+      repoInstalls = aggregateRepoInstalls([
         ...enrichedSkillsRankDetails,
         ...enrichedSkillsSh
       ]);
-      enrichedAgentskills = applyAggregatedInstalls(enrichedAgentskills, repoInstallsMap);
+      enrichedAgentskills = applyAggregatedInstalls(enrichedAgentskills, repoInstalls);
     }
 
     const allItems = [
