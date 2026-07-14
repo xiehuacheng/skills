@@ -115,7 +115,7 @@ description: 根据指定领域，初始化并维护一个 Obsidian 优先、兼
 
 项目、实验、真题、案例等应用性内容目前不在本 skill 的定义范围内。后续版本将根据实际使用场景决定是否引入 `03-Projects/` 或把应用内容下沉到 `02-Areas/<领域>/` 下。当前 agent 不应主动创建任何应用目录。
 
-6. 创建第一版 agent schema 文档（例如 Claude Code 用 `CLAUDE.md`，Codex / OpenCode 等用 `AGENTS.md`），并同时创建 `WORKFLOWS.md` 作为工作流程手册。可参考仓库根目录下的 `templates/WORKFLOWS.md` 模板。其中需包含：
+6. 创建第一版 agent schema 文档（例如 Claude Code 用 `CLAUDE.md`，Codex / OpenCode 等用 `AGENTS.md`），并同时创建 `WORKFLOWS.md` 作为工作流程手册。可参考本 skill 目录下的 `templates/WORKFLOWS.md` 模板。其中需包含：
    - Karpathy 原文中提到的 Wiki 内容类型
    - OKF 要求的 `type` 字段及取值规范
    - 根目录 `index.md` 和 `log.md` 的角色与格式
