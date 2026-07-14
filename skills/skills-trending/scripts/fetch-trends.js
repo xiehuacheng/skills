@@ -1,6 +1,6 @@
 const { parseAgentskills } = require('./parse-agentskills');
 const { parseSkillsRank, parseSkillsRankDetails } = require('./parse-skillsrank');
-const { parseSkillsSh } = require('./parse-skillssh');
+const { parseSkillsShLeaderboard } = require('./parse-skillssh-leaderboard');
 const { dedupeAndMerge, sortByHotScore } = require('./dedupe');
 const { getCachedData, saveCachedData } = require('./cache');
 const { filterByCategory, filterBySearch } = require('./categories');
@@ -97,7 +97,7 @@ async function fetchAllData() {
     return [];
   });
 
-  const skillsshPromise = parseSkillsSh().catch(err => {
+  const skillsshPromise = parseSkillsShLeaderboard().catch(err => {
     console.error('skills.sh failed:', err.message);
     return [];
   });
@@ -144,7 +144,7 @@ function enrichWithRepoStars(items, repoStarsMap) {
 }
 
 function aggregateRepoInstalls(detailItems) {
-  // Sum installs of all individual skills under the same repo.
+  // Sum installs of all skills under the same repo.
   // This allows repo-level skills (e.g. obra/superpowers@superpowers) to show
   // the combined install count of the whole repository.
   const map = new Map();
