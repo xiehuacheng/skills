@@ -7,7 +7,7 @@
 | Skill | 描述 |
 |-------|------|
 | [`skills-trending`](./skills/skills-trending) | 聚合多个排行榜的热门 Agent Skills，支持分类筛选、关键词搜索、24h 趋势榜和 JSON 输出 |
-| [`init-wiki`](./skills/init-wiki) | 根据指定领域初始化并维护 Karpathy 式 LLM Wiki，兼容 Google Cloud OKF 0.1 |
+| [`init-wiki`](./skills/init-wiki/README.md) | 根据指定领域初始化并维护 Karpathy 式 LLM Wiki，兼容 Google Cloud OKF 0.1 |
 
 ## 安装方法
 
