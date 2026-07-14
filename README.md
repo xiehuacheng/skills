@@ -7,6 +7,7 @@
 | Skill | 描述 |
 |-------|------|
 | [`skills-trending`](./skills/skills-trending) | 聚合多个排行榜的热门 Agent Skills，支持分类筛选、关键词搜索、24h 趋势榜和 JSON 输出 |
+| [`init-wiki`](./skills/init-wiki) | 根据指定领域初始化并维护 Karpathy 式 LLM Wiki，兼容 Google Cloud OKF 0.1 |
 
 ## 安装方法
 
@@ -41,6 +42,9 @@ node skills/skills-trending/scripts/fetch-trends.js --trending --top 10
 
 # 强制刷新数据并以 JSON 输出
 node skills/skills-trending/scripts/fetch-trends.js --refresh --json
+
+# 安装 init-wiki 后，在 agent 环境中使用 /init-wiki 初始化一个领域的 wiki
+npx skills add xiehuacheng/Orange_Skills@init-wiki
 ```
 
 ## 项目特点
