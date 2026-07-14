@@ -83,15 +83,9 @@ function formatSearchResults(items, query) {
   return output;
 }
 
-function formatInstallCommand(item) {
-  const name = item.skill_id || `${item.full_name}@${item.name}`;
-  return `npx skills add ${name}`;
-}
-
 module.exports = {
   formatTopTable,
   formatByCategory,
   formatSearchResults,
-  formatInstallCommand,
   formatNumber
 };

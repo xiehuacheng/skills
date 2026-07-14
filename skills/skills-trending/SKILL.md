@@ -36,6 +36,7 @@ When this skill is installed via `npx skills add`, the skill directory is availa
 | `--top, -n` | Number of top skills to show | `--top 10` |
 | `--category, -c` | Filter by category | `--category frontend` |
 | `--search, -s` | Search by keyword | `--search "react testing"` |
+| `--trending, -t` | Show skills.sh 24h trending (Playwright) | `--trending --top 10` |
 | `--refresh, -r` | Force refresh data | `--refresh` |
 | `--json, -j` | Output JSON | `--json` |
 
@@ -53,6 +54,9 @@ node scripts/fetch-trends.js --search testing
 
 # Force refresh and output JSON
 node scripts/fetch-trends.js --refresh --json
+
+# Show skills.sh 24h trending
+node scripts/fetch-trends.js --trending --top 10
 ```
 
 ## Output Format
@@ -60,9 +64,9 @@ node scripts/fetch-trends.js --refresh --json
 The script outputs markdown tables by default. Present them cleanly to the user.
 
 For each skill, include:
-- Name and install command
+- Name
 - Stars (from agentskills.media)
-- Installs (from skills.sh)
+- Installs (from skills-rank.com / skills.sh)
 - Hot score (combined ranking)
 - Category
 - One-line description
@@ -71,4 +75,5 @@ For each skill, include:
 
 - If data seems stale, add `--refresh`.
 - Category filtering supports partial matches (e.g., `--category frontend` matches "Web Dev" and "UI/UX").
-- The first run may take 30-60 seconds because skills.sh data is fetched via CLI.
+- The first `--refresh` may take 30–60 seconds because data is fetched from several upstream APIs.
+- `--trending` requires the Python/Playwright environment; other commands do not.

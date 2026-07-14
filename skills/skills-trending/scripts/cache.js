@@ -55,14 +55,8 @@ function saveCachedData(data, cacheKey = 'default') {
   }, cacheKey);
 }
 
-function getPreviousData(cacheKey = 'default') {
-  const cache = readCache(cacheKey);
-  return cache && cache.data ? cache.data : null;
-}
-
 module.exports = {
   getCachedData,
   saveCachedData,
-  getPreviousData,
   DEFAULT_TTL_MS
 };

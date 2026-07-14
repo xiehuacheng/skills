@@ -187,4 +187,4 @@ async function parseSkillsSh(queries = DEFAULT_QUERIES, options = {}) {
   return allItems.sort((a, b) => b.installs - a.installs);
 }
 
-module.exports = { parseSkillsSh, DEFAULT_QUERIES };
+module.exports = { parseSkillsSh };

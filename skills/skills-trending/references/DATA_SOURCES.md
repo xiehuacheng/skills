@@ -21,15 +21,15 @@
 ## 3. skills.sh
 
 - **URL**: https://skills.sh/
-- **Data**: Real install counts (installs)
-- **API**: `npx skills find <query>` CLI
+- **Data**: Real install counts (installs); 24h trending leaderboard
+- **API**: Public search API (`/api/search`), optional authenticated v1 leaderboard (`/api/v1/skills`), and a headless-browser scraper for the 24h trending tab
 - **Update frequency**: Real-time
 - **Coverage**: Vercel skills registry
 
 ## Notes
 
 - Data from all sources is cached locally for 1 hour by default to avoid rate limits.
-- A skill's "hot score" is a log-scaled weighted combination of GitHub stars and install counts.
+- A skill's "hot score" is a log-scaled weighted combination of GitHub stars and install counts, normalized against the maximum values in the current dataset.
 - Skills from `skills-rank.com` and `skills.sh` inherit repo-level stars from `agentskills.media` when available, so individual skills can have both metrics.
 - Repo-level skills (e.g. `owner/repo@repo`) aggregate installs from all individual skills under that repository.
 - Some skills may appear in multiple sources with slightly different names; we normalize by `owner/repo@skill-name`.

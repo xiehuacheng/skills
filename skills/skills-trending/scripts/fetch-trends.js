@@ -1,14 +1,14 @@
 const { parseAgentskills } = require('./parse-agentskills');
 const { parseSkillsRank, parseSkillsRankDetails } = require('./parse-skillsrank');
 const { parseSkillsSh } = require('./parse-skillssh');
-const { parseSkillsShTrending } = require('./parse-skillssh-trending');
 const { dedupeAndMerge, sortByHotScore } = require('./dedupe');
 const { getCachedData, saveCachedData } = require('./cache');
+const { filterByCategory, filterBySearch } = require('./categories');
+const { fetchTrendingData, formatTrendingTable } = require('./trending');
 const {
   formatTopTable,
   formatByCategory,
-  formatSearchResults,
-  formatNumber
+  formatSearchResults
 } = require('./format');
 
 function parseArgs() {
@@ -194,115 +194,6 @@ function applyAggregatedInstalls(agentskills, repoInstallsMap) {
   });
 }
 
-const CATEGORY_ALIASES = {
-  frontend: ['Web Dev', 'UI/UX'],
-  ui: ['UI/UX', 'Web Dev'],
-  design: ['UI/UX', 'Web Dev'],
-  react: ['Web Dev', 'UI/UX'],
-  testing: ['Testing'],
-  test: ['Testing'],
-  security: ['Security'],
-  devops: ['DevOps'],
-  docker: ['DevOps'],
-  kubernetes: ['DevOps'],
-  k8s: ['DevOps'],
-  agent: ['AI Agents'],
-  agents: ['AI Agents'],
-  memory: ['Knowledge', 'AI Agents'],
-  knowledge: ['Knowledge'],
-  prompt: ['Prompts'],
-  prompts: ['Prompts'],
-  doc: ['Docs'],
-  docs: ['Docs'],
-  documentation: ['Docs'],
-  automation: ['Automation'],
-  search: ['Search'],
-  integration: ['Integrations'],
-  integrations: ['Integrations'],
-  data: ['Data'],
-  review: ['Review'],
-  planning: ['Planning'],
-  game: ['Game Dev'],
-  gamedev: ['Game Dev'],
-  writing: ['Writing'],
-  code: ['Code Gen'],
-  codegen: ['Code Gen'],
-  general: ['General'],
-  awesome: ['Awesome List']
-};
-
-function filterByCategory(items, category) {
-  const query = category.toLowerCase().trim();
-  const matchedCategories = new Set(CATEGORY_ALIASES[query] || [query]);
-
-  return items.filter(item => {
-    // Match normalized categories
-    const categoryMatch = item.categories && item.categories.some(c =>
-      Array.from(matchedCategories).some(mc => c.toLowerCase().includes(mc.toLowerCase()))
-    );
-
-    // Also match name/description/topics against the query directly
-    const text = [
-      item.name,
-      item.full_name,
-      item.description,
-      ...(item.topics || []),
-      ...(item.categories || [])
-    ].join(' ').toLowerCase();
-    const textMatch = text.includes(query);
-
-    return categoryMatch || textMatch;
-  });
-}
-
-function filterBySearch(items, query) {
-  const q = query.toLowerCase();
-  return items.filter(item => {
-    const text = [
-      item.name,
-      item.full_name,
-      item.description,
-      ...(item.topics || []),
-      ...(item.categories || [])
-    ].join(' ').toLowerCase();
-    return text.includes(q);
-  });
-}
-
-async function enrichTrendingWithStars(trendingItems) {
-  console.error('Fetching agentskills.media stars for trending items...');
-  const agentskills = await parseAgentskills().catch(err => {
-    console.error('agentskills.media failed:', err.message);
-    return [];
-  });
-
-  const repoStarsMap = buildRepoStarsMap(agentskills);
-  return trendingItems.map(item => {
-    const repoKey = (item.full_name || '').toLowerCase();
-    const stars = repoStarsMap.get(repoKey) || 0;
-    return { ...item, stars };
-  });
-}
-
-function formatTrendingTable(items, topN = 20) {
-  const topItems = items.slice(0, topN);
-
-  let output = `## Top ${topN} skills.sh Trending (24h)\n\n`;
-  output += '| Trending Rank | Skill | Stars | 24h Installs | Global Rank |\n';
-  output += '|--------------:|------|------:|-------------:|------------:|\n';
-
-  topItems.forEach((item, index) => {
-    const trendingRank = index + 1;
-    const globalRank = item.rank || '-';
-    const name = item.skill_id || `${item.full_name}@${item.name}` || item.full_name || item.name;
-    const stars = formatNumber(item.stars);
-    const installs = formatNumber(item.installs);
-    output += `| ${trendingRank} | \`${name}\` | ${stars} | ${installs} | ${globalRank} |\n`;
-  });
-
-  return output;
-}
-
 async function main() {
   const options = parseArgs();
 
@@ -311,8 +202,7 @@ async function main() {
     let sourceInfo = { fromCache: true, trending: true };
 
     if (!data || !Array.isArray(data) || data.length === 0 || !data[0].rank) {
-      const trendingItems = await parseSkillsShTrending();
-      data = await enrichTrendingWithStars(trendingItems);
+      data = await fetchTrendingData();
       saveCachedData(data, 'trending');
       sourceInfo = { fromCache: false, trending: true, total: data.length };
     }

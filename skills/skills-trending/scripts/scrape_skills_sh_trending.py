@@ -1,6 +1,7 @@
 import asyncio
 import json
 import re
+import sys
 from playwright.async_api import async_playwright
 
 
@@ -37,22 +38,21 @@ async def scrape_trending():
         browser = await p.chromium.launch(headless=True)
         page = await browser.new_page(viewport={"width": 1280, "height": 800})
 
-        print("Opening https://skills.sh/...")
+        print("Opening https://skills.sh/...", file=sys.stderr)
         await page.goto("https://skills.sh/", wait_until="networkidle", timeout=60000)
         await page.wait_for_timeout(2000)
 
         # Click the "Trending (24h)" tab
         tab = page.get_by_text("Trending (24h)", exact=False)
         if await tab.count() > 0:
-            print("Clicking Trending tab...")
+            print("Clicking Trending tab...", file=sys.stderr)
             await tab.first.click()
             await page.wait_for_timeout(3000)
 
         # Wait for trending content to render.
         # Note: skills.sh uses virtualization; aggressive scrolling unmounts top
-        # items. We capture the initial viewport + a few small scrolls to get the
-        # top trending skills without losing them.
-        print("Capturing trending skills...")
+        # items. We capture the initial viewport without scrolling.
+        print("Capturing trending skills...", file=sys.stderr)
         await page.wait_for_timeout(2000)
 
         # Extract skill rows
@@ -113,18 +113,12 @@ async def scrape_trending():
                 "source": source,
                 "full_name": source,
                 "installs": parse_installs(match.group(4)),
-                "installs_text": match.group(4).strip(),
                 "url": f"https://skills.sh{row['href']}"
             })
 
         parsed.sort(key=lambda x: x["rank"])
 
-        print(f"\nTotal unique trending skills: {len(parsed)}")
-        print("Top 10:")
-        print(json.dumps(parsed[:10], indent=2, ensure_ascii=False))
-
-        await page.screenshot(path="/tmp/skills-sh-trending.png", full_page=True)
-        print("Screenshot saved to /tmp/skills-sh-trending.png")
+        print(f"Total unique trending skills: {len(parsed)}", file=sys.stderr)
 
         await browser.close()
         return parsed
@@ -132,8 +126,5 @@ async def scrape_trending():
 
 if __name__ == "__main__":
     result = asyncio.run(scrape_trending())
-    with open("/tmp/skills-sh-trending.json", "w", encoding="utf-8") as f:
-        json.dump(result, f, indent=2, ensure_ascii=False)
-    print(f"Saved {len(result)} skills to /tmp/skills-sh-trending.json")
     # Print the full result to stdout so Node.js can consume it.
     print(json.dumps(result, ensure_ascii=False))

@@ -1,28 +1,9 @@
-function normalizeName(name) {
-  if (!name) return '';
-  return name
-    .toLowerCase()
-    .replace(/[-_]/g, '')
-    .replace(/skill$/g, '')
-    .replace(/skills$/g, '')
-    .trim();
-}
-
 function getSkillKey(item) {
   // Deduplicate by full skill identity: owner/repo@skill-name
   // A single GitHub repo can host multiple skills, so repo-level merging is wrong.
   return (item.skill_id || `${item.full_name}@${item.name}` || item.full_name || item.id || '')
     .toLowerCase()
     .trim();
-}
-
-function mergeCategories(categoriesA, categoriesB) {
-  const set = new Set([...(categoriesA || []), ...(categoriesB || [])]);
-  return Array.from(set);
-}
-
-function getRepoKey(fullName) {
-  return String(fullName || '').toLowerCase().trim();
 }
 
 function dedupeAndMerge(items) {
@@ -35,13 +16,19 @@ function dedupeAndMerge(items) {
     if (map.has(key)) {
       const existing = map.get(key);
 
+      // Prefer categories already provided by an authoritative source
+      // (e.g. agentskills.media). Don't let heuristic inference override them.
+      const categories = existing.categories?.length > 0
+        ? existing.categories
+        : item.categories;
+
       // Merge fields, preferring non-empty values from either source
       map.set(key, {
         ...existing,
         ...item,
         name: item.name || existing.name,
         description: item.description || existing.description,
-        categories: mergeCategories(existing.categories, item.categories),
+        categories,
         stars: item.stars || existing.stars || 0,
         rank_score: item.rank_score || existing.rank_score || 0,
         installs: item.installs || existing.installs || 0,
@@ -60,38 +47,7 @@ function dedupeAndMerge(items) {
     }
   }
 
-  const merged = Array.from(map.values());
-
-  // Repo-level fallback: some sources list a GitHub repo as a single skill
-  // (e.g. agentskills.media's `affaan-m/ECC@ECC`), while skills-rank.com lists
-  // individual skills inside the same repo (e.g. `affaan-m/ecc@security-scan`).
-  // When a repo-level skill has no installs, borrow the highest installs found
-  // for any skill in that repo.
-  const repoMaxInstalls = new Map();
-  for (const item of merged) {
-    const repoKey = getRepoKey(item.full_name);
-    if (!repoKey) continue;
-    const installs = item.installs || item.rank_score || 0;
-    if (installs > 0 && installs > (repoMaxInstalls.get(repoKey) || 0)) {
-      repoMaxInstalls.set(repoKey, installs);
-    }
-  }
-
-  for (const item of merged) {
-    const hasInstalls = (item.installs || item.rank_score || 0) > 0;
-    if (hasInstalls) continue;
-
-    const repoKey = getRepoKey(item.full_name);
-    const fallbackInstalls = repoKey ? repoMaxInstalls.get(repoKey) : undefined;
-    if (fallbackInstalls && fallbackInstalls > 0) {
-      item.installs = fallbackInstalls;
-      if (!item.sources.includes('skills-rank.com')) {
-        item.sources.push('skills-rank.com');
-      }
-    }
-  }
-
-  return merged;
+  return Array.from(map.values());
 }
 
 function logScore(value, max) {
@@ -102,13 +58,13 @@ function logScore(value, max) {
   return Math.min(Math.max(score, 0), 100);
 }
 
-function calculateHotScore(item) {
+function calculateHotScore(item, maxStars, maxInstalls) {
   // Use installs directly; rank_score from skills-rank.com is already expressed
   // as install count, so we treat them as the same signal.
   const installs = item.installs || item.rank_score || 0;
 
-  const starsScore = logScore(item.stars || 0, 300_000);
-  const installsScore = logScore(installs, 3_000_000);
+  const starsScore = logScore(item.stars || 0, maxStars);
+  const installsScore = logScore(installs, maxInstalls);
 
   const hasStars = item.stars > 0;
   const hasInstalls = installs > 0;
@@ -129,14 +85,15 @@ function calculateHotScore(item) {
 }
 
 function sortByHotScore(items) {
+  const maxStars = Math.max(1, ...items.map(item => item.stars || 0));
+  const maxInstalls = Math.max(1, ...items.map(item => item.installs || item.rank_score || 0));
+
   return items
-    .map(item => ({ ...item, hot_score: calculateHotScore(item) }))
+    .map(item => ({ ...item, hot_score: calculateHotScore(item, maxStars, maxInstalls) }))
     .sort((a, b) => b.hot_score - a.hot_score);
 }
 
 module.exports = {
   dedupeAndMerge,
-  sortByHotScore,
-  calculateHotScore,
-  normalizeName
+  sortByHotScore
 };
