@@ -288,15 +288,16 @@ function formatTrendingTable(items, topN = 20) {
   const topItems = items.slice(0, topN);
 
   let output = `## Top ${topN} skills.sh Trending (24h)\n\n`;
-  output += '| Rank | Skill | Stars | 24h Installs | Source |\n';
-  output += '|-----:|------|------:|-------------:|:-------|\n';
+  output += '| Trending Rank | Skill | Stars | 24h Installs | Global Rank |\n';
+  output += '|--------------:|------|------:|-------------:|------------:|\n';
 
   topItems.forEach((item, index) => {
-    const rank = item.rank || index + 1;
+    const trendingRank = index + 1;
+    const globalRank = item.rank || '-';
     const name = item.skill_id || `${item.full_name}@${item.name}` || item.full_name || item.name;
     const stars = formatNumber(item.stars);
     const installs = formatNumber(item.installs);
-    output += `| ${rank} | \`${name}\` | ${stars} | ${installs} | skills.sh |\n`;
+    output += `| ${trendingRank} | \`${name}\` | ${stars} | ${installs} | ${globalRank} |\n`;
   });
 
   return output;
@@ -306,13 +307,13 @@ async function main() {
   const options = parseArgs();
 
   if (options.trending) {
-    let data = getCachedData(options.refresh);
+    let data = getCachedData(options.refresh, undefined, 'trending');
     let sourceInfo = { fromCache: true, trending: true };
 
     if (!data || !Array.isArray(data) || data.length === 0 || !data[0].rank) {
       const trendingItems = await parseSkillsShTrending();
       data = await enrichTrendingWithStars(trendingItems);
-      saveCachedData(data);
+      saveCachedData(data, 'trending');
       sourceInfo = { fromCache: false, trending: true, total: data.length };
     }
 
