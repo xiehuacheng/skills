@@ -16,6 +16,10 @@ function truncate(text, maxLength = 80) {
   return text.slice(0, maxLength - 3) + '...';
 }
 
+function formatInstallHint() {
+  return '\n**Install:** `npx skills add <Skill>`（将 `<Skill>` 替换为表格中 `Skill` 列的值）\n';
+}
+
 function formatTopTable(items, topN = 20) {
   const topItems = items.slice(0, topN);
   
@@ -35,6 +39,7 @@ function formatTopTable(items, topN = 20) {
     output += `| ${rank} | \`${name}\` | ${stars} | ${installs} | ${score} | ${categories} | ${description} |\n`;
   });
   
+  output += formatInstallHint();
   return output;
 }
 
@@ -59,6 +64,7 @@ function formatByCategory(items, categories, topN = null) {
     output += `| ${index + 1} | \`${name}\` | ${stars} | ${installs} | ${categoriesStr} | ${description} |\n`;
   });
 
+  output += formatInstallHint();
   return output;
 }
 
@@ -80,6 +86,7 @@ function formatSearchResults(items, query) {
     output += `| \`${name}\` | ${stars} | ${installs} | ${categories} | ${description} |\n`;
   });
   
+  output += formatInstallHint();
   return output;
 }
 

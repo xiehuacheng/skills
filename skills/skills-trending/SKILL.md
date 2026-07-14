@@ -71,9 +71,43 @@ For each skill, include:
 - Category
 - One-line description
 
+Each report ends with a quick install hint. You can install any listed skill with:
+
+```bash
+npx skills add <Skill>
+```
+
+Replace `<Skill>` with the value shown in the `Skill` column (e.g. `obra/superpowers@superpowers`).
+
+## Common Categories
+
+| Category | Aliases | Typical Queries |
+|----------|---------|-----------------|
+| Web Dev | `frontend`, `web`, `webdev`, `react`, `nextjs`, `typescript`, `css`, `tailwind` | Frontend frameworks, full-stack web skills |
+| UI/UX | `ui`, `ux`, `design`, `design-system`, `accessibility` | Design systems, visual design, accessibility |
+| Testing | `testing`, `test`, `jest`, `playwright`, `e2e` | Unit tests, e2e tests, QA |
+| DevOps | `devops`, `docker`, `kubernetes`, `k8s`, `deploy`, `ci-cd` | Deployment, containers, CI/CD |
+| Docs | `doc`, `docs`, `documentation`, `api-docs`, `changelog`, `readme` | README, changelog, documentation generation |
+| Code Quality | `review`, `lint`, `refactor`, `best-practices`, `code-quality` | PR review, linting, refactoring |
+| Automation | `automation`, `workflow`, `git`, `productivity` | Git workflows, task automation |
+| AI Agents | `agent`, `agents`, `memory` | Agent frameworks, memory, planning |
+| Knowledge | `knowledge` | Knowledge management, RAG |
+| Prompts | `prompt`, `prompts` | Prompt engineering, optimization |
+| Security | `security` | Security review, hardening |
+| Data | `data` | Data analysis, visualization |
+| Integrations | `integration`, `integrations` | Third-party tool integrations |
+| Search | `search` | Search capabilities |
+| Planning | `planning` | Task planning, project management |
+| Game Dev | `game`, `gamedev` | Game development |
+| Writing | `writing` | Writing, content generation |
+| Code Gen | `code`, `codegen` | Code generation |
+| Awesome List | `awesome` | Curated awesome lists |
+| General | `general` | General-purpose skills |
+
 ## Tips
 
 - If data seems stale, add `--refresh`.
-- Category filtering supports partial matches (e.g., `--category frontend` matches "Web Dev" and "UI/UX").
+- Category filtering supports partial matches and aliases (e.g., `--category frontend` matches "Web Dev" and "UI/UX").
+- Use specific keywords when searching: `--search "react testing"` works better than `--search testing`.
 - The first `--refresh` may take 30–60 seconds because data is fetched from several upstream APIs.
 - `--trending` requires the Python/Playwright environment; other commands do not.
