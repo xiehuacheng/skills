@@ -68,7 +68,7 @@ npx skills add /path/to/Orange_Skills@hot-skills
 
 [`creating-skills`](./skills/creating-skills) 用于创建新的 Agent Skill。
 
-它通过协作式头脑风暴帮助用户澄清 skill 的场景、触发时机和范围，提供命名与结构建议，并内置 `init_skill.py` 脚手架和 `quick_validate.py` 校验脚本。强调人在回路中的确认节点、渐进式披露、以及脚本间优先使用 stdin/stdout 组合而非中间文件。
+它通过协作式头脑风暴帮助用户澄清 skill 的场景、触发时机和范围，提供命名与结构建议，并在每个关键节点停下来等用户确认。强调渐进式披露、人在回路中的决策，以及 skill 工作流中脚本优先通过 stdin/stdout 组合而非生成中间文件。
 
 ## 贡献
 
