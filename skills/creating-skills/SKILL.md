@@ -68,6 +68,17 @@ Structure content in three levels:
 
 Keep SKILL.md lean. Move detailed guides, schemas, API docs, and multi-framework variants to `references/`.
 
+### 6. Use Structured Interaction for User Input
+
+When a skill needs information or decisions from the user, prefer the agent's structured interaction capabilities (e.g., multiple-choice questions, confirmations) over dumping a wall of text questions into the chat. This keeps the conversation focused and reduces friction.
+
+Guidelines:
+
+- Group related questions into a single structured turn when it makes sense
+- Avoid asking the user to reply to long lists of free-text questions
+- For binary or scoped decisions, use single-choice or multi-choice prompts
+- Fall back to free-text only when the answer is genuinely open-ended
+
 ## Skill Creation Workflow
 
 Follow these steps in order. Do not skip checkpoints.
