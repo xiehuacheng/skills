@@ -64,6 +64,12 @@ npx skills add /path/to/skills@hot-skills
 
 它通过 GitHub CLI 或 `GITHUB_TOKEN` 读取数据，提供多个本地分析命令：分析并分类 GitHub Stars、审计个人仓库健康度、生成 GitHub Profile README、为指定仓库补全描述与 topics、以及将 Stars 整理进 GitHub Lists。生成 Profile README 时可自定义 Tech Stack、Featured Projects 的展示风格（`static` / `shields` / `compact` / `highlight`）与数量，并且 Tech Stack 和具体高亮哪些仓库都需要在生成前与用户确认。所有写操作都需要用户明确确认，默认只输出结构化 Markdown 报告。
 
+### cv-builder
+
+[`cv-builder`](./skills/cv-builder) 用于构建技术岗简历或 CV。
+
+它从本地项目、GitHub 仓库、旧简历文件或纯文本笔记中收集材料，通过 sub agent 并行读取并提炼项目亮点，再引导用户确认个人信息、求职目标、经历技能等内容，最终生成 Markdown 草稿并渲染为 HTML/PDF。支持 modern、classic、minimal 等内置模板，也支持自定义模板或 agent 根据描述生成风格。
+
 ### creating-skills
 
 [`creating-skills`](./skills/creating-skills) 用于创建新的 Agent Skill。

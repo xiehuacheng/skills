@@ -64,6 +64,12 @@ It follows the Google Cloud Open Knowledge Format (OKF) v0.1 with an Obsidian-fi
 
 It reads data via the GitHub CLI or `GITHUB_TOKEN`, and provides several local analysis commands: analyze and categorize GitHub Stars, audit personal repository health, generate a GitHub Profile README, fill in descriptions and topics for a given repository, and organize Stars into GitHub Lists. When generating a Profile README, you can customize the Tech Stack, the Featured Projects style (`static` / `shields` / `compact` / `highlight`), and the number of projects; the Tech Stack and which repositories to highlight must be confirmed with the user before generation. All write operations require explicit user confirmation; by default it only outputs structured Markdown reports.
 
+### cv-builder
+
+[`cv-builder`](./skills/cv-builder) is used to build tech resumes or CVs.
+
+It collects materials from local projects, GitHub repositories, existing resume files, or plain-text notes; uses sub agents to read and extract project highlights in parallel; guides the user through confirming personal info, career goals, experience, and skills; and finally generates a Markdown draft that can be rendered into HTML/PDF. Supports built-in templates such as modern, classic, and minimal, as well as custom templates or agent-generated styles based on user descriptions.
+
 ### creating-skills
 
 [`creating-skills`](./skills/creating-skills) is used to create new Agent Skills.
