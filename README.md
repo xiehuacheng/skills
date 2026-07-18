@@ -1,4 +1,4 @@
-**中文** | [English](./i18n/README.en.md) | [日本語](./i18n/README.ja.md)
+**中文** | [English](./docs/README.en.md) | [日本語](./docs/README.ja.md)
 
 # skills
 
