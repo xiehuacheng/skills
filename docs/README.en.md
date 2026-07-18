@@ -62,7 +62,7 @@ It follows the Google Cloud Open Knowledge Format (OKF) v0.1 with an Obsidian-fi
 
 [`github-asset-manager`](./skills/github-asset-manager) is used to organize and improve GitHub digital assets.
 
-It reads data via the GitHub CLI or `GITHUB_TOKEN`, and provides several local analysis commands: analyze and categorize GitHub Stars, audit personal repository health, generate a GitHub Profile README, fill in descriptions and topics for a given repository, and organize Stars into GitHub Lists. All write operations require explicit user confirmation; by default it only outputs structured Markdown reports.
+It reads data via the GitHub CLI or `GITHUB_TOKEN`, and provides several local analysis commands: analyze and categorize GitHub Stars, audit personal repository health, generate a GitHub Profile README, fill in descriptions and topics for a given repository, and organize Stars into GitHub Lists. When generating a Profile README, you can customize the Tech Stack, the Featured Projects style (`static` / `shields` / `compact` / `highlight`), and the number of projects; the Tech Stack and which repositories to highlight must be confirmed with the user before generation. All write operations require explicit user confirmation; by default it only outputs structured Markdown reports.
 
 ### creating-skills
 

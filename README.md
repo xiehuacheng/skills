@@ -62,7 +62,7 @@ npx skills add /path/to/skills@hot-skills
 
 [`github-asset-manager`](./skills/github-asset-manager) 用于整理和改善 GitHub 数字资产。
 
-它通过 GitHub CLI 或 `GITHUB_TOKEN` 读取数据，提供多个本地分析命令：分析并分类 GitHub Stars、审计个人仓库健康度、生成 GitHub Profile README、为指定仓库补全描述与 topics、以及将 Stars 整理进 GitHub Lists。所有写操作都需要用户明确确认，默认只输出结构化 Markdown 报告。
+它通过 GitHub CLI 或 `GITHUB_TOKEN` 读取数据，提供多个本地分析命令：分析并分类 GitHub Stars、审计个人仓库健康度、生成 GitHub Profile README、为指定仓库补全描述与 topics、以及将 Stars 整理进 GitHub Lists。生成 Profile README 时可自定义 Tech Stack、Featured Projects 的展示风格（`static` / `shields` / `compact` / `highlight`）与数量，并且 Tech Stack 和具体高亮哪些仓库都需要在生成前与用户确认。所有写操作都需要用户明确确认，默认只输出结构化 Markdown 报告。
 
 ### creating-skills
 
