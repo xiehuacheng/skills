@@ -100,9 +100,16 @@ function renderFeaturedRepos(repos, options = {}) {
   }
 
   if (style === 'highlight') {
-    const r = featured[0];
-    const desc = r.description || 'No description';
-    return `I'm currently focused on **[${r.name}](${r.html_url})** — ${desc}`;
+    if (featured.length === 1) {
+      const r = featured[0];
+      const desc = r.description || 'No description';
+      return `I'm currently focused on **[${r.name}](${r.html_url})** — ${desc}`;
+    }
+    const items = featured.map(r => {
+      const desc = r.description || 'No description';
+      return `- **[${r.name}](${r.html_url})** — ${desc}`;
+    }).join('\n');
+    return `I'm currently focused on:\n\n${items}`;
   }
 
   return featured

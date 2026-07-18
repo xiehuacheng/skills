@@ -295,7 +295,7 @@ If the user's intent is already specific (for example, "分类我的 GitHub Star
    - Align each section with the user one by one before generating.
    - **Tech Stack**: present the proposed list of technologies and ask the user to confirm, add, or remove items. The default list is a starting point, not a final decision.
    - **Featured Projects**: explicitly confirm whether to include this section. GitHub already shows a "Popular repositories" panel on the profile, so this section is optional. If the user wants it, confirm how many repositories (`--featured-limit`) and which specific repositories to highlight. Do not auto-select projects without user approval.
-   - Choose how featured projects display their star counts: `static` (snapshot at generation time), `shields` (live shields.io badges in a table), `compact` (live badges in a minimal list), or `highlight` (a single sentence focusing on one project).
+   - Choose how featured projects display their star counts: `static` (snapshot at generation time), `shields` (live shields.io badges in a table), `compact` (live badges in a minimal list), or `highlight` (a focused sentence or short list). For `highlight`, recommend 1–2 projects and ask the user to decide; do not default to a long list.
    - Show the complete result to the user and discuss any final tweaks.
    - Only push to the profile repository after explicit user confirmation.
 5. **Classify stars** if the user wants to organize their GitHub Star Lists. Always confirm before applying.
