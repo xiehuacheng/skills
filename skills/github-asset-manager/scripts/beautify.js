@@ -91,6 +91,56 @@ async function detectEcosystemBadges(owner, repoName, repo) {
   return badges;
 }
 
+function stripTrailingDraftNotes(readmeText) {
+  if (!readmeText) return readmeText;
+
+  const draftKeywords = [
+    'draft', 'generated', 'automatically', 'automatic', 'auto-generated',
+    '自动生成', '草稿', '自動生成', 'ドラフト',
+    'borrador', 'generado', 'automáticamente',
+    'entwurf', 'automatisch', 'erstellt',
+    'brouillon', 'généré', 'automatiquement',
+  ];
+  const lowerKeywords = draftKeywords.map(k => k.toLowerCase());
+
+  function containsDraftKeyword(text) {
+    const lower = text.toLowerCase();
+    return lowerKeywords.some(k => lower.includes(k));
+  }
+
+  let trimmed = readmeText.replace(/\s+$/, '');
+
+  while (true) {
+    const hrBlockMatch = trimmed.match(/(\n-{3,}[ \t]*\n\n)(\n?>[ \t]*[^\n]*\n?)+(\n-{3,}[ \t]*\n?)?$/);
+    if (hrBlockMatch) {
+      const blockText = hrBlockMatch[0].replace(/\n/g, ' ');
+      if (containsDraftKeyword(blockText)) {
+        trimmed = trimmed.slice(0, -hrBlockMatch[0].length).replace(/\s+$/, '');
+        continue;
+      }
+    }
+
+    const bqMatch = trimmed.match(/(\n>[ \t]*[^\n]*)+$/);
+    if (bqMatch) {
+      const blockText = bqMatch[0].replace(/\n/g, ' ');
+      if (containsDraftKeyword(blockText)) {
+        trimmed = trimmed.slice(0, -bqMatch[0].length).replace(/\s+$/, '');
+        continue;
+      }
+    }
+
+    const trailingHrMatch = trimmed.match(/\n-{3,}[ \t]*\n?$/);
+    if (trailingHrMatch) {
+      trimmed = trimmed.slice(0, -trailingHrMatch[0].length).replace(/\s+$/, '');
+      continue;
+    }
+
+    break;
+  }
+
+  return trimmed;
+}
+
 function classifyHeading(title) {
   const lower = title.toLowerCase().trim();
   for (const [key, sectionKey] of HEADING_TO_KEY) {
@@ -211,9 +261,10 @@ async function generateBeautifiedReadme(repoFullName, options = {}) {
   }
 
   const repo = await getSingle(`/repos/${owner}/${repoName}`);
-  const readmeText = options.fromFile
+  const rawReadmeText = options.fromFile
     ? fs.readFileSync(path.resolve(options.fromFile), 'utf8')
     : await fetchReadme(owner, repoName);
+  const readmeText = stripTrailingDraftNotes(rawReadmeText);
 
   const { title, description, sections } = parseReadmeSections(readmeText);
   const repoTitle = title || repo.name;
@@ -242,9 +293,6 @@ async function generateBeautifiedReadme(repoFullName, options = {}) {
   for (const section of sections) {
     parts.push('\n' + renderSection(section));
   }
-
-  parts.push(report.hr());
-  parts.push(report.blockquote('This README is a generated draft. Please review and edit it before applying to the repository.'));
 
   return parts.join('\n').trim() + '\n';
 }

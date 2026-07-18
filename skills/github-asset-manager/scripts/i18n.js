@@ -21,7 +21,7 @@ const TRANSLATIONS = {
     fallbackLanguageName: 'software',
     descriptionTemplate: (lang, owner) => `A ${lang} project by ${owner}.`,
     toc: 'Table of Contents',
-    draftNote: 'This README is a generated multilingual draft. Original content is preserved; section headings are translated.',
+    draftNote: 'This is a translated version. For the authoritative content, please refer to README.md.',
     sectionTitles: {
       overview: 'Overview',
       features: 'Features',
@@ -36,7 +36,7 @@ const TRANSLATIONS = {
     fallbackLanguageName: '软件',
     descriptionTemplate: (lang, owner) => `由 ${owner} 维护的 ${lang} 项目。`,
     toc: '目录',
-    draftNote: '本 README 为自动生成的多语言草稿，正文保留了原始内容，章节标题已翻译。',
+    draftNote: '本文为翻译版本，权威内容请以 README.md 为准。',
     sectionTitles: {
       overview: '概述',
       features: '功能',
@@ -51,7 +51,7 @@ const TRANSLATIONS = {
     fallbackLanguageName: 'ソフトウェア',
     descriptionTemplate: (lang, owner) => `${owner} の ${lang} プロジェクト。`,
     toc: '目次',
-    draftNote: 'この README は自動生成された多言語ドラフトです。本文は元の内容を保持し、セクション見出しを翻訳しています。',
+    draftNote: 'この文書は翻訳版です。正確な内容は README.md を参照してください。',
     sectionTitles: {
       overview: '概要',
       features: '機能',
@@ -66,7 +66,7 @@ const TRANSLATIONS = {
     fallbackLanguageName: 'software',
     descriptionTemplate: (lang, owner) => `Un proyecto de ${lang} por ${owner}.`,
     toc: 'Tabla de contenidos',
-    draftNote: 'Este README es un borrador multilingüe generado automáticamente. Se conserva el contenido original; los títulos de sección están traducidos.',
+    draftNote: 'Esta es una versión traducida. Para el contenido autorizado, consulte README.md.',
     sectionTitles: {
       overview: 'Descripción general',
       features: 'Características',
@@ -81,7 +81,7 @@ const TRANSLATIONS = {
     fallbackLanguageName: 'Software',
     descriptionTemplate: (lang, owner) => `Ein ${lang}-Projekt von ${owner}.`,
     toc: 'Inhaltsverzeichnis',
-    draftNote: 'Dieses README ist ein automatisch erstellter mehrsprachiger Entwurf. Der ursprüngliche Inhalt bleibt erhalten; die Abschnittsüberschriften sind übersetzt.',
+    draftNote: 'Dies ist eine übersetzte Version. Der maßgebliche Inhalt befindet sich in README.md.',
     sectionTitles: {
       overview: 'Überblick',
       features: 'Funktionen',
@@ -96,7 +96,7 @@ const TRANSLATIONS = {
     fallbackLanguageName: 'logiciel',
     descriptionTemplate: (lang, owner) => `Un projet ${lang} par ${owner}.`,
     toc: 'Table des matières',
-    draftNote: "Ce README est un brouillon multilingue généré automatiquement. Le contenu original est conservé ; les titres de section sont traduits.",
+    draftNote: "Ceci est une version traduite. Pour le contenu faisant autorité, veuillez consulter README.md.",
     sectionTitles: {
       overview: 'Aperçu',
       features: 'Fonctionnalités',
@@ -213,12 +213,14 @@ function detectSourceLanguage(readmeText) {
   if (!readmeText) return 'en';
 
   // Remove fenced code blocks, inline code, link URLs and standalone URLs so they
-  // do not skew detection toward English.
+  // do not skew detection toward English. Also strip raw HTML tags and image URLs.
   const naturalText = readmeText
     .replace(/```[\s\S]*?```/g, '')
     .replace(/`[^`]+`/g, '')
     .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
-    .replace(/https?:\/\/[^\s)]+/g, '');
+    .replace(/!\[[^\]]*\]\([^)]+\)/g, '')
+    .replace(/https?:\/\/[^\s)]+/g, '')
+    .replace(/<[^>]+>/g, ' ');
 
   const text = naturalText.replace(/\s/g, '');
   if (text.length === 0) return 'en';
@@ -257,16 +259,81 @@ function classifyHeading(title) {
   return null;
 }
 
+// Remove trailing "generated draft" notes that this script (or similar tools)
+// may have appended to the README. Matches blocks surrounded by horizontal rules
+// as well as plain trailing blockquotes that contain draft-related keywords.
+function stripTrailingDraftNotes(readmeText) {
+  if (!readmeText) return readmeText;
+
+  const draftKeywords = [
+    'draft', 'generated', 'automatically', 'automatic', 'auto-generated',
+    '自动生成', '草稿', '自動生成', 'ドラフト',
+    'borrador', 'generado', 'automáticamente',
+    'entwurf', 'automatisch', 'erstellt',
+    'brouillon', 'généré', 'automatiquement',
+  ];
+  const lowerKeywords = draftKeywords.map(k => k.toLowerCase());
+
+  function containsDraftKeyword(text) {
+    const lower = text.toLowerCase();
+    return lowerKeywords.some(k => lower.includes(k));
+  }
+
+  let trimmed = readmeText.replace(/\s+$/, '');
+
+  while (true) {
+    // Pattern: optional hr, then one or more blockquote lines, then optional hr, at end.
+    const hrBlockMatch = trimmed.match(/(\n-{3,}[ \t]*\n\n)(\n?>[ \t]*[^\n]*\n?)+(\n-{3,}[ \t]*\n?)?$/);
+    if (hrBlockMatch) {
+      const blockText = hrBlockMatch[0].replace(/\n/g, ' ');
+      if (containsDraftKeyword(blockText)) {
+        trimmed = trimmed.slice(0, -hrBlockMatch[0].length).replace(/\s+$/, '');
+        continue;
+      }
+    }
+
+    // Pattern: plain trailing blockquote(s).
+    const bqMatch = trimmed.match(/(\n>[ \t]*[^\n]*)+$/);
+    if (bqMatch) {
+      const blockText = bqMatch[0].replace(/\n/g, ' ');
+      if (containsDraftKeyword(blockText)) {
+        trimmed = trimmed.slice(0, -bqMatch[0].length).replace(/\s+$/, '');
+        continue;
+      }
+    }
+
+    // Pattern: trailing hr after removing blockquotes.
+    const trailingHrMatch = trimmed.match(/\n-{3,}[ \t]*\n?$/);
+    if (trailingHrMatch) {
+      trimmed = trimmed.slice(0, -trailingHrMatch[0].length).replace(/\s+$/, '');
+      continue;
+    }
+
+    break;
+  }
+
+  return trimmed;
+}
+
+function isBadgeLine(line) {
+  const trimmed = line.trim();
+  if (!trimmed) return false;
+  // Markdown image/badge syntax or shields.io URLs
+  return /^\[!\[/.test(trimmed) || /^!\[/.test(trimmed) || /shields\.io|badgen\.net|img\.shields/.test(trimmed);
+}
+
 function parseReadmeSections(readmeText) {
   if (!readmeText || !readmeText.trim()) {
-    return { title: null, description: null, sections: [] };
+    return { title: null, description: null, badges: [], sections: [] };
   }
 
   const lines = readmeText.split('\n');
   const sections = [];
+  const badges = [];
   let title = null;
   let description = null;
   let currentSection = null;
+  let foundH1 = false;
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
@@ -276,30 +343,33 @@ function parseReadmeSections(readmeText) {
       const level = headingMatch[1].length;
       const headingText = headingMatch[2].trim();
 
+      if (level === 1 && !title) {
+        title = headingText;
+        foundH1 = true;
+        continue;
+      }
+
+      // h2+ heading: close current section and start a new one.
       if (currentSection) {
         currentSection.content = currentSection.content.trim();
         sections.push(currentSection);
       }
-
-      if (level === 1 && !title) {
-        title = headingText;
-        currentSection = null;
-      } else {
-        currentSection = {
-          level,
-          title: headingText,
-          key: classifyHeading(headingText),
-          content: '',
-        };
-      }
+      currentSection = {
+        level,
+        title: headingText,
+        key: classifyHeading(headingText),
+        content: '',
+      };
       continue;
     }
 
     if (currentSection) {
       currentSection.content += line + '\n';
-    } else if (!description) {
+    } else if (foundH1) {
       const trimmed = line.trim();
-      if (trimmed && !trimmed.startsWith('![') && !trimmed.startsWith('[![') && trimmed.length < 300) {
+      if (isBadgeLine(trimmed)) {
+        badges.push(trimmed);
+      } else if (!description && trimmed && trimmed.length < 300) {
         description = trimmed;
       }
     }
@@ -310,7 +380,7 @@ function parseReadmeSections(readmeText) {
     sections.push(currentSection);
   }
 
-  return { title, description, sections };
+  return { title, description, badges, sections };
 }
 
 function isTocSection(section) {
@@ -343,15 +413,23 @@ function toAnchor(title) {
     .replace(/\s+/g, '-');
 }
 
-function buildSwitcher(currentLang, langs) {
-  const primaryLang = langs[0];
+function buildSwitcher(currentLang, primaryLang, langs) {
+  const isPrimary = currentLang === primaryLang;
+
   const items = langs.map(lang => {
     const label = LANG_DISPLAY[lang];
-    const filename = lang === primaryLang ? 'README.md' : `README.${lang}.md`;
     if (lang === currentLang) {
       return report.bold(label);
     }
-    return report.link(label, `./${filename}`);
+
+    let targetPath;
+    if (lang === primaryLang) {
+      targetPath = isPrimary ? './README.md' : '../README.md';
+    } else {
+      targetPath = isPrimary ? `./i18n/README.${lang}.md` : `./README.${lang}.md`;
+    }
+
+    return report.link(label, targetPath);
   });
 
   return items.join(' | ');
@@ -380,19 +458,24 @@ function makeOneLiner(repo, lang, isPrimary, originalDescription) {
   return t.descriptionTemplate(languageName, repo.owner.login);
 }
 
-function buildReadme(repo, parsed, lang, langs) {
+function buildReadme(repo, parsed, lang, primaryLang, langs) {
   const t = TRANSLATIONS[lang];
-  const isPrimary = lang === langs[0];
+  const isPrimary = lang === primaryLang;
   const title = parsed.title || repo.name;
   const description = makeOneLiner(repo, lang, isPrimary, repo.description || parsed.description);
 
   const parts = [];
-  parts.push(buildSwitcher(lang, langs));
+  parts.push(buildSwitcher(lang, primaryLang, langs));
   parts.push('');
   parts.push(`# ${title}`);
   parts.push('');
   parts.push(`> ${description}`);
   parts.push('');
+
+  if (parsed.badges && parsed.badges.length > 0) {
+    parts.push(parsed.badges.join(' '));
+    parts.push('');
+  }
 
   const contentSections = parsed.sections.filter(s => !isTocSection(s));
 
@@ -411,8 +494,10 @@ function buildReadme(repo, parsed, lang, langs) {
     }
   }
 
-  parts.push(`> ${t.draftNote}`);
-  parts.push('');
+  if (!isPrimary) {
+    parts.push(`> ${t.draftNote}`);
+    parts.push('');
+  }
 
   return parts.join('\n').trim() + '\n';
 }
@@ -453,14 +538,11 @@ async function generateI18n(repoFullName, options = {}) {
     : await fetchReadme(owner, repoName);
   const sourceLang = detectSourceLanguage(readmeText);
 
-  const langs = normalizeLangs(options.langs);
+  let langs = normalizeLangs(options.langs);
   if (!langs || langs.length === 0) {
-    throw new Error(
-      `Please choose languages for the multilingual README.\n` +
-      `Detected source language: ${LANG_DISPLAY[sourceLang]} (${sourceLang})\n` +
-      `Supported languages: ${buildSupportedLangsList()}\n` +
-      `Example: --langs ${sourceLang === 'zh' ? 'zh,en,ja' : 'en,zh,ja'}`
-    );
+    // No languages requested: default to the detected source language and
+    // produce only the root README.
+    langs = [sourceLang];
   }
 
   const primaryLang = langs[0];
@@ -472,14 +554,14 @@ async function generateI18n(repoFullName, options = {}) {
     );
   }
 
-  const parsed = parseReadmeSections(readmeText);
+  const parsed = parseReadmeSections(stripTrailingDraftNotes(readmeText));
 
   const files = [];
   const descriptions = [];
 
   for (const lang of langs) {
-    const filename = lang === primaryLang ? 'README.md' : `README.${lang}.md`;
-    const content = buildReadme(repo, parsed, lang, langs);
+    const filename = lang === primaryLang ? 'README.md' : `i18n/README.${lang}.md`;
+    const content = buildReadme(repo, parsed, lang, primaryLang, langs);
     const text = makeOneLiner(repo, lang, lang === primaryLang, repo.description || parsed.description);
 
     files.push({ lang, filename, content });

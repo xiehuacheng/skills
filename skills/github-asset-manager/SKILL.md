@@ -149,17 +149,27 @@ node scripts/github-asset-manager.js beautify --repo <owner/repo-name> --from-fi
 ### Multilingual README and Description
 
 ```bash
-node scripts/github-asset-manager.js i18n --repo <owner/repo-name> [--langs <codes>]
+node scripts/github-asset-manager.js i18n --repo <owner/repo-name> --langs <primary>,<additional...>
 ```
 
-Use this when the user wants READMEs in multiple languages. The command analyzes the original README, detects its source language, and asks the user to pick the target languages via `--langs`. It then generates:
+Use this when the user wants READMEs in multiple languages.
 
-- `README.md` in the primary (source) language.
-- `README.<lang>.md` for each additional requested language.
+Workflow:
+
+1. Analyze the existing README and detect its source language. Present the detection to the user and ask them to confirm, for example: "你的 README 看起来是中文，对吗？".
+2. Ask the user which language should be the primary language for `README.md`.
+3. Ask the user which additional languages to generate. Supported language codes: `en`, `zh`, `ja`, `es`, `de`, `fr`.
+4. Explain that the additional language files will be placed in `i18n/README.<lang>.md`.
+5. Only after the user confirms the full language list, run the command with `--langs <primary>,<additional...>`.
+
+The command then generates:
+
+- `README.md` in the primary language.
+- `i18n/README.<lang>.md` for each additional requested language.
 - Each file includes a language switcher linking to the other translations.
 - A recommended description for the repository About section.
 
-`--langs` is required. Supported language codes: `en`, `zh`, `ja`, `es`, `de`, `fr`. The first code in the list becomes the primary output language; if it does not match the detected source language, the command warns and suggests putting the source language first.
+The first code in the `--langs` list becomes the primary output language. If it does not match the detected source language, the command warns and suggests putting the source language first.
 
 Because GitHub only supports one description in the repository About section, the primary language description is recommended. Discuss with the user whether to use it as-is or combine it with another language.
 
@@ -173,7 +183,7 @@ node scripts/github-asset-manager.js i18n --repo <owner/repo-name> --langs zh,en
 Output files (when `--output <dir>` is used):
 
 - `README.md`
-- `README.zh.md`, etc.
+- `i18n/README.en.md`, `i18n/README.ja.md`, etc.
 - `i18n-summary.md` — overview of generated files and the recommended description.
 
 ### Classify GitHub Stars into Lists
@@ -236,7 +246,7 @@ Shortcut that runs both `stars` and `repos`. Use this for an overall GitHub heal
 | `--refresh, -r` | Force refresh GitHub API cache | `--refresh` |
 | `--repo` | Repository for draft, beautify, and i18n commands | `--repo owner/repo-name` |
 | `--from-file` | Read README from a local file for `beautify`/`i18n` | `--from-file ./README.md` |
-| `--langs` | Comma-separated language codes for `i18n` | `--langs en,zh,ja` |
+| `--langs` | Comma-separated language codes for `i18n` (asked by the agent) | `--langs en,zh,ja` |
 | `--apply` | Apply a classification plan (requires `--plan`) | `--apply --plan ./plan.json` |
 | `--plan` | Path to classification plan JSON | `--plan ./plan.json` |
 

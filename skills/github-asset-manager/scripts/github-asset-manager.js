@@ -87,7 +87,7 @@ Options:
   --email <email>         Contact email for profile README
   --featured-sort <mode>  Sort featured projects by 'stars' or 'recent'
   --theme <theme>         Stats card theme (default: tokyonight)
-  --langs <list>          Required for i18n: comma-separated language codes
+  --langs <list>          Comma-separated language codes for i18n (asked by the agent)
   --apply                 Apply a classification plan (requires --plan)
   --plan <file>           Classification plan JSON file (use - for stdin)
   --help, -h              Show this help
@@ -114,8 +114,8 @@ function ensureDir(dir) {
 }
 
 function writeFile(dir, filename, content) {
-  ensureDir(dir);
   const filePath = path.resolve(dir, filename);
+  ensureDir(path.dirname(filePath));
   fs.writeFileSync(filePath, content, 'utf8');
   return filePath;
 }
