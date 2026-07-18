@@ -198,10 +198,13 @@ For each target language, spawn a sub-agent with a prompt like this (replace `<l
 > - The language switcher line at the top.
 > - The title (`# skills`) and the one-line description in the `> ...` blockquote.
 > - All shields.io badge lines.
-> - All Markdown links, code blocks, inline code, file paths, and repository names such as `xiehuacheng/skills` and `skills/<skill-name>`.
+> - All Markdown links, inline code, file paths, and repository names such as `xiehuacheng/skills` and `skills/<skill-name>`.
+> - Actual CLI commands in fenced code blocks (e.g., `npx skills add xiehuacheng/skills@hot-skills`).
 > - The section structure and heading levels.
 >
-> Translate all prose paragraphs, list items, and section headings into natural, fluent <lang>. Do not add or remove sections. Return the complete translated Markdown file content.
+> Translate all prose paragraphs, list items, section headings, and **example user prompts** in ` ```text ` blocks into natural, fluent <lang>. Example prompts like "帮我安装这个仓库下的所有 skill： xiehuacheng/skills@hot-skills" should be translated so users know how to ask in <lang>, but keep the `owner/repo@skill-name` reference unchanged.
+>
+> Do not add or remove sections. Return the complete translated Markdown file content.
 
 Do not attempt to translate the body inline in a single pass; parallel sub-agents produce better results and are easier to review.
 

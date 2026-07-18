@@ -9,7 +9,7 @@
 ## Table of Contents
 
 - [Installation](#installation)
-- [Skill 介绍](#skill-介绍)
+- [Skill Introduction](#skill-introduction)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -18,14 +18,14 @@
 Install with a single sentence to your agent:
 
 ```text
-帮我安装这个仓库下的所有 skill： xiehuacheng/skills@hot-skills
+Please help me install all skills under this repository: xiehuacheng/skills@hot-skills
 ```
 
 Or:
 
 ```text
-帮我从这个仓库安装 skill： xiehuacheng/skills@hot-skills
-只安装：（你想要安装的 skill 名称）
+Please help me install skills from this repository: xiehuacheng/skills@hot-skills
+Only install: (the skill names you want)
 ```
 
 Or use the [skills.sh](https://skills.sh/) CLI directly:
@@ -40,7 +40,7 @@ For local testing, you can also specify a path directly:
 npx skills add /path/to/skills@hot-skills
 ```
 
-## Skill 介绍
+## Skill Introduction
 
 ### hot-skills
 
