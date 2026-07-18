@@ -135,13 +135,31 @@ function analyzeReadme(repo, readmeText = '') {
 
   const lower = readmeText.toLowerCase();
 
-  if (!lower.includes('install')) {
+  const hasInstall =
+    lower.includes('install') ||
+    lower.includes('安装') ||
+    lower.includes('インストール');
+  const hasUsage =
+    lower.includes('usage') ||
+    lower.includes('example') ||
+    lower.includes('使用') ||
+    lower.includes('示例') ||
+    lower.includes('例子') ||
+    lower.includes('使い方') ||
+    lower.includes('サンプル');
+  const hasLicense =
+    lower.includes('license') ||
+    lower.includes('许可') ||
+    lower.includes('许可证') ||
+    lower.includes('ライセンス');
+
+  if (!hasInstall) {
     issues.push('Consider adding an installation section.');
   }
-  if (!lower.includes('usage') && !lower.includes('example')) {
+  if (!hasUsage) {
     issues.push('Consider adding a usage or examples section.');
   }
-  if (!lower.includes('license')) {
+  if (!hasLicense) {
     issues.push('Consider adding a license section or LICENSE file.');
   }
   if (readmeText.length < 500) {

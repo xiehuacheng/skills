@@ -16,12 +16,6 @@ async function fetchRepos(user, currentUser, refresh = false) {
   return data;
 }
 
-function hasReadme(repo) {
-  // GitHub API does not always include has_readme, but has a root contents endpoint
-  // We approximate by checking if the repo object indicates a default branch exists
-  return null;
-}
-
 async function checkLicenseFile(owner, name) {
   try {
     const contents = await getSingle(`repos/${owner}/${name}/contents`);

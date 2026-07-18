@@ -26,6 +26,7 @@ const TRANSLATIONS = {
       overview: 'Overview',
       features: 'Features',
       installation: 'Installation',
+      'getting-started': 'Quick Start',
       usage: 'Usage',
       contributing: 'Contributing',
       license: 'License',
@@ -41,6 +42,7 @@ const TRANSLATIONS = {
       overview: '概述',
       features: '功能',
       installation: '安装',
+      'getting-started': '快速开始',
       usage: '使用',
       contributing: '贡献',
       license: '许可证',
@@ -56,6 +58,7 @@ const TRANSLATIONS = {
       overview: '概要',
       features: '機能',
       installation: 'インストール',
+      'getting-started': 'クイックスタート',
       usage: '使い方',
       contributing: '貢献',
       license: 'ライセンス',
@@ -71,6 +74,7 @@ const TRANSLATIONS = {
       overview: 'Descripción general',
       features: 'Características',
       installation: 'Instalación',
+      'getting-started': 'Inicio rápido',
       usage: 'Uso',
       contributing: 'Contribuciones',
       license: 'Licencia',
@@ -86,6 +90,7 @@ const TRANSLATIONS = {
       overview: 'Überblick',
       features: 'Funktionen',
       installation: 'Installation',
+      'getting-started': 'Schnellstart',
       usage: 'Nutzung',
       contributing: 'Mitwirken',
       license: 'Lizenz',
@@ -101,6 +106,7 @@ const TRANSLATIONS = {
       overview: 'Aperçu',
       features: 'Fonctionnalités',
       installation: 'Installation',
+      'getting-started': 'Démarrage rapide',
       usage: 'Utilisation',
       contributing: 'Contribution',
       license: 'Licence',
@@ -118,8 +124,10 @@ const HEADING_TO_KEY = new Map([
   ['feature', 'features'],
   ['installation', 'installation'],
   ['install', 'installation'],
-  ['getting started', 'installation'],
   ['setup', 'installation'],
+  ['getting started', 'getting-started'],
+  ['quick start', 'getting-started'],
+  ['quickstart', 'getting-started'],
   ['usage', 'usage'],
   ['use', 'usage'],
   ['using', 'usage'],
@@ -138,7 +146,8 @@ const HEADING_TO_KEY = new Map([
   ['特性', 'features'],
   ['安装', 'installation'],
   ['安装方法', 'installation'],
-  ['快速开始', 'installation'],
+  ['快速开始', 'getting-started'],
+  ['起步', 'getting-started'],
   ['使用', 'usage'],
   ['使用方法', 'usage'],
   ['示例', 'usage'],
@@ -152,6 +161,7 @@ const HEADING_TO_KEY = new Map([
   ['紹介', 'overview'],
   ['機能', 'features'],
   ['インストール', 'installation'],
+  ['クイックスタート', 'getting-started'],
   ['使い方', 'usage'],
   ['使用例', 'usage'],
   ['貢献', 'contributing'],
@@ -449,7 +459,10 @@ function buildToc(sections, lang) {
 }
 
 function makeOneLiner(repo, lang, isPrimary, originalDescription) {
-  if (isPrimary && originalDescription) {
+  if (originalDescription) {
+    // For the primary language, keep the original. For translations, keep the
+    // original too; the sub-agent will translate the one-liner naturally.
+    // Avoid the generic "A {lang} project by {owner}" template whenever possible.
     return originalDescription;
   }
 

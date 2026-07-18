@@ -6,7 +6,11 @@ const DEFAULT_TTL_MS = 60 * 60 * 1000; // 1 hour
 
 function ensureCacheDir() {
   if (!fs.existsSync(CACHE_DIR)) {
-    fs.mkdirSync(CACHE_DIR, { recursive: true });
+    try {
+      fs.mkdirSync(CACHE_DIR, { recursive: true });
+    } catch (err) {
+      throw new Error(`Failed to create cache directory ${CACHE_DIR}: ${err.message}`);
+    }
   }
 }
 
@@ -33,7 +37,7 @@ function get(key, options = {}) {
     const data = fs.readFileSync(cachePath, 'utf8');
     return JSON.parse(data);
   } catch (err) {
-    console.warn(`Warning: failed to read cache ${cachePath}: ${err.message}`);
+    console.error(`Cache read failed for ${cachePath}: ${err.message}. Try running with --refresh to rebuild the cache.`);
     return null;
   }
 }
@@ -41,7 +45,11 @@ function get(key, options = {}) {
 function set(key, data) {
   ensureCacheDir();
   const cachePath = getCachePath(key);
-  fs.writeFileSync(cachePath, JSON.stringify(data, null, 2));
+  try {
+    fs.writeFileSync(cachePath, JSON.stringify(data, null, 2));
+  } catch (err) {
+    throw new Error(`Failed to write cache ${cachePath}: ${err.message}`);
+  }
 }
 
 function clear(key) {

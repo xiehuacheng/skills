@@ -103,7 +103,7 @@ Options:
   --featured-repos <list> Comma-separated list of repository names to highlight
   --tech-stack <list>     Comma-separated list of tech stack badges
   --theme <theme>         Stats card theme (default: tokyonight)
-  --langs <list>          Comma-separated language codes for i18n (asked by the agent)
+  --langs <list>          Comma-separated language codes for i18n (must be confirmed by the user first)
   --apply                 Apply a classification plan (requires --plan)
   --plan <file>           Classification plan JSON file (use - for stdin)
   --help, -h              Show this help
@@ -115,8 +115,8 @@ Examples:
   node scripts/github-asset-manager.js draft --repo owner/repo-name
   node scripts/github-asset-manager.js beautify --repo owner/repo-name
   node scripts/github-asset-manager.js beautify --repo owner/repo-name --from-file ./README.md
-  node scripts/github-asset-manager.js i18n --repo owner/repo-name --langs en,zh,ja
-  node scripts/github-asset-manager.js i18n --repo owner/repo-name --langs en,zh,ja --from-file ./README.md
+  node scripts/github-asset-manager.js i18n --repo owner/repo-name --langs <primary>,<additional...>
+  node scripts/github-asset-manager.js i18n --repo owner/repo-name --langs <primary>,<additional...> --from-file ./README.md
   node scripts/github-asset-manager.js audit
   node scripts/github-asset-manager.js classify
   node scripts/github-asset-manager.js classify --apply --plan ./plan.json
@@ -125,14 +125,22 @@ Examples:
 
 function ensureDir(dir) {
   if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
+    try {
+      fs.mkdirSync(dir, { recursive: true });
+    } catch (err) {
+      throw new Error(`Failed to create output directory ${dir}: ${err.message}`);
+    }
   }
 }
 
 function writeFile(dir, filename, content) {
   const filePath = path.resolve(dir, filename);
   ensureDir(path.dirname(filePath));
-  fs.writeFileSync(filePath, content, 'utf8');
+  try {
+    fs.writeFileSync(filePath, content, 'utf8');
+  } catch (err) {
+    throw new Error(`Failed to write output file ${filePath}: ${err.message}`);
+  }
   return filePath;
 }
 

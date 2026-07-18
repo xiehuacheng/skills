@@ -2,7 +2,7 @@ const { getAll } = require('./api');
 const cache = require('./cache');
 const report = require('./report');
 
-const TWO_YEARS_MS = 2 * 365 * 24 * 60 * 60 * 1000;
+const ONE_YEAR_MS = 365 * 24 * 60 * 60 * 1000;
 
 async function fetchStars(user, refresh = false) {
   const cacheKey = `stars-${user}`;
@@ -22,7 +22,7 @@ function analyzeStars(repos) {
   const now = Date.now();
   const stale = repos.filter(r => {
     const pushed = new Date(r.pushed_at).getTime();
-    return now - pushed > TWO_YEARS_MS;
+    return now - pushed > ONE_YEAR_MS;
   });
 
   const byLanguage = {};
@@ -80,7 +80,7 @@ function generateStarsReport(data, user) {
       ['Total Stars', data.total],
       ['Archived Repositories', data.archived],
       ['No Description', data.noDescription],
-      ['Stale (>2 years)', data.stale],
+      ['Stale (>1 year)', data.stale],
     ]
   ));
 
@@ -114,7 +114,7 @@ function generateStarsReport(data, user) {
     parts.push(report.paragraph('No archived repositories found.'));
   }
 
-  parts.push(report.h2('Stale Repositories (>2 years without push)'));
+  parts.push(report.h2('Stale Repositories (>1 year without push)'));
   if (data.staleRepos.length > 0) {
     parts.push(report.paragraph(`Showing top ${data.staleRepos.length} of ${data.stale} stale repositories:`));
     parts.push(report.table(
