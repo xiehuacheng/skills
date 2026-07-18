@@ -154,6 +154,8 @@ node scripts/github-asset-manager.js i18n --repo <owner/repo-name> --langs <prim
 
 Use this when the user wants READMEs in multiple languages.
 
+The CLI command generates the file structure and translates section headings, but **the actual body content is translated by sub-agents** — one per target language. This produces higher-quality, context-aware translations than a deterministic script.
+
 Workflow:
 
 1. Analyze the existing README and detect its source language. Present the detection to the user and ask them to confirm, for example: "你的 README 看起来是中文，对吗？".
@@ -161,8 +163,10 @@ Workflow:
 3. Ask the user which additional languages to generate. Supported language codes: `en`, `zh`, `ja`, `es`, `de`, `fr`.
 4. Explain that the additional language files will be placed in `docs/README.<lang>.md`.
 5. Only after the user confirms the full language list, run the command with `--langs <primary>,<additional...>`.
+6. The command generates `README.md` and `docs/README.<lang>.md`. At this point the body text is still in the source language; only headings are translated.
+7. **Delegate body translation to sub-agents.** Spawn one sub-agent per target language and have it translate the body of its assigned `docs/README.<lang>.md`.
 
-The command then generates:
+The command generates:
 
 - `README.md` in the primary language.
 - `docs/README.<lang>.md` for each additional requested language.
@@ -186,16 +190,20 @@ Output files (when `--output <dir>` is used):
 - `docs/README.en.md`, `docs/README.ja.md`, etc.
 - `i18n-summary.md` — overview of generated files and the recommended description.
 
-> **Translation scope:** The `i18n` command currently translates **section headings only** and preserves the original body text unchanged. This gives you a working multilingual structure quickly, but it is not a full high-quality translation of the README content.
+#### Sub-agent translation prompt
+
+For each target language, spawn a sub-agent with a prompt like this (replace `<lang>` with the target language name, e.g., English):
+
+> Translate the body content of `docs/README.<lang>.md` into <lang>. Keep the following unchanged:
+> - The language switcher line at the top.
+> - The title (`# skills`) and the one-line description in the `> ...` blockquote.
+> - All shields.io badge lines.
+> - All Markdown links, code blocks, inline code, file paths, and repository names such as `xiehuacheng/skills` and `skills/<skill-name>`.
+> - The section structure and heading levels.
 >
-> For a complete, high-quality translation of the actual body content, follow this workflow:
->
-> 1. Run the `i18n` command to generate the file structure (`README.md` and `docs/README.<lang>.md`).
-> 2. Spawn one sub-agent per target language.
-> 3. Have each sub-agent translate the body content of its assigned `docs/README.<lang>.md` while keeping the structure, badges, and language switcher intact.
-> 4. Write the translated files back to the same paths.
->
-> Do not attempt to translate the body inline in a single pass; parallel sub-agents produce better results and are easier to review.
+> Translate all prose paragraphs, list items, and section headings into natural, fluent <lang>. Do not add or remove sections. Return the complete translated Markdown file content.
+
+Do not attempt to translate the body inline in a single pass; parallel sub-agents produce better results and are easier to review.
 
 ### Classify GitHub Stars into Lists
 
