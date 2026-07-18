@@ -98,7 +98,7 @@ Options:
   --from-file <path>      Read README from a local file for beautify/i18n
   --email <email>         Contact email for profile README
   --featured-sort <mode>  Sort featured projects by 'stars' or 'recent'
-  --featured-style <mode> Featured project style: 'static', 'shields', or 'compact'
+  --featured-style <mode> Featured project style: 'static', 'shields', 'compact', or 'highlight'
   --featured-limit <n>    Number of featured projects (0 hides the section)
   --featured-repos <list> Comma-separated list of repository names to highlight
   --tech-stack <list>     Comma-separated list of tech stack badges

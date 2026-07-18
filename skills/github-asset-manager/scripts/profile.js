@@ -99,6 +99,12 @@ function renderFeaturedRepos(repos, options = {}) {
       .join('\n\n');
   }
 
+  if (style === 'highlight') {
+    const r = featured[0];
+    const desc = r.description || 'No description';
+    return `I'm currently focused on **[${r.name}](${r.html_url})** — ${desc}`;
+  }
+
   return featured
     .map(r => {
       const stars = `⭐ ${r.stargazers_count}`;
@@ -172,6 +178,9 @@ async function generateProfile(user, currentUser, options = {}) {
     .replace('{{techStack}}', renderTechStack(techStack || DEFAULT_TECH_STACK));
 
   if (featuredRepos) {
+    if (featuredStyle === 'highlight') {
+      result = result.replace('## ⭐ Featured Projects', '## 🔥 Highlight');
+    }
     result = result.replace('{{featuredRepos}}', featuredRepos);
   } else {
     // Remove the entire Featured Projects section when no repositories are selected

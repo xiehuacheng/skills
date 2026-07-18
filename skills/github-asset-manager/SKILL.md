@@ -81,7 +81,7 @@ After receiving the output, identify the most impactful improvements and ask the
 ### Generate Profile README
 
 ```bash
-node scripts/github-asset-manager.js profile [--user <username>] [--refresh] [--email <email>] [--featured-sort stars|recent] [--featured-style static|shields|compact] [--featured-limit <n>] [--featured-repos <repo1,repo2,...>] [--tech-stack <tech1,tech2,...>] [--theme <theme>]
+node scripts/github-asset-manager.js profile [--user <username>] [--refresh] [--email <email>] [--featured-sort stars|recent] [--featured-style static|shields|compact|highlight] [--featured-limit <n>] [--featured-repos <repo1,repo2,...>] [--tech-stack <tech1,tech2,...>] [--theme <theme>]
 ```
 
 Use this when the user wants to improve their GitHub profile page. The output is a complete README markdown suitable for the `username/username` repository.
@@ -112,7 +112,7 @@ When presenting each section, use tables or lists so the user can easily approve
 |---|---|---|
 | `--email` | Contact email to show in the README | Read from GitHub profile |
 | `--featured-sort` | Sort featured projects by `stars` or `recent` | `stars` |
-| `--featured-style` | Render featured projects as `static` text, `shields` live badges (table), or `compact` list | `static` |
+| `--featured-style` | Render featured projects as `static` text, `shields` live badges (table), `compact` list, or `highlight` single project | `static` |
 | `--featured-limit` | Number of featured projects to display; `0` hides the section entirely | `6` |
 | `--featured-repos` | Comma-separated repository names to highlight (overrides sorting) | Top sorted repos |
 | `--tech-stack` | Comma-separated list of technologies for the Tech Stack badge row | Default list |
@@ -295,7 +295,7 @@ If the user's intent is already specific (for example, "分类我的 GitHub Star
    - Align each section with the user one by one before generating.
    - **Tech Stack**: present the proposed list of technologies and ask the user to confirm, add, or remove items. The default list is a starting point, not a final decision.
    - **Featured Projects**: explicitly confirm whether to include this section. GitHub already shows a "Popular repositories" panel on the profile, so this section is optional. If the user wants it, confirm how many repositories (`--featured-limit`) and which specific repositories to highlight. Do not auto-select projects without user approval.
-   - Choose how featured projects display their star counts: `static` (snapshot at generation time), `shields` (live shields.io badges in a table), or `compact` (live badges in a minimal list).
+   - Choose how featured projects display their star counts: `static` (snapshot at generation time), `shields` (live shields.io badges in a table), `compact` (live badges in a minimal list), or `highlight` (a single sentence focusing on one project).
    - Show the complete result to the user and discuss any final tweaks.
    - Only push to the profile repository after explicit user confirmation.
 5. **Classify stars** if the user wants to organize their GitHub Star Lists. Always confirm before applying.
