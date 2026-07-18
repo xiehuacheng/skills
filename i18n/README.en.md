@@ -1,19 +1,19 @@
-**中文** | [English](./i18n/README.en.md) | [日本語](./i18n/README.ja.md)
+[中文](../README.md) | **English** | [日本語](./README.ja.md)
 
 # skills
 
-> Agent Skills 技能集合，将各领域经验打包为可复用的 AI 能力 | A collection of Agent Skills that turn AI agents into reusable domain experts.
+> A JavaScript project by xiehuacheng.
 
 ![GitHub top language](https://img.shields.io/github/languages/top/xiehuacheng/skills) ![GitHub Repo stars](https://img.shields.io/github/stars/xiehuacheng/skills?style=social) ![GitHub forks](https://img.shields.io/github/forks/xiehuacheng/skills?style=social) ![GitHub License](https://img.shields.io/github/license/xiehuacheng/skills) ![GitHub Issues](https://img.shields.io/github/issues/xiehuacheng/skills) ![GitHub last commit](https://img.shields.io/github/last-commit/xiehuacheng/skills)
 
-## 目录
+## Table of Contents
 
-- [安装](#安装)
+- [Installation](#installation)
 - [Skill 介绍](#skill-介绍)
-- [贡献](#贡献)
-- [许可证](#许可证)
+- [Contributing](#contributing)
+- [License](#license)
 
-## 安装
+## Installation
 
 对 agent 说一句话即可安装：
 
@@ -70,10 +70,12 @@ npx skills add /path/to/skills@hot-skills
 
 它通过协作式头脑风暴帮助用户澄清 skill 的场景、触发时机和范围，提供命名与结构建议，并在每个关键节点停下来等用户确认。强调渐进式披露、人在回路中的决策，以及 skill 工作流中脚本优先通过 stdin/stdout 组合而非生成中间文件。
 
-## 贡献
+## Contributing
 
 欢迎提交新的 skill 或改进现有 skill。每个 skill 请单独放在 `skills/<skill-name>/` 目录下，并包含 `SKILL.md` 说明文件。
 
-## 许可证
+## License
 
 [MIT](./LICENSE)
+
+> This is a translated version. For the authoritative content, please refer to README.md.
