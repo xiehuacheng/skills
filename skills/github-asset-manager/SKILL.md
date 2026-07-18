@@ -37,6 +37,17 @@ Run commands from the skill root directory. When installed via `npx skills add`,
 
 All commands print their result to stdout by default. Add `--output <dir>` only if the user explicitly asks to save reports as files.
 
+Available commands:
+
+- `stars` — Analyze and report on GitHub starred repositories
+- `repos` — Audit your own GitHub repositories
+- `profile` — Generate a GitHub Profile README
+- `draft` — Generate completion draft for a specific repository
+- `beautify` — Beautify a repository README
+- `i18n` — Generate multilingual READMEs and descriptions
+- `audit` — Run both stars and repos analysis
+- `classify` — Generate or apply GitHub Star Lists classification
+
 ### Analyze GitHub Stars
 
 ```bash
@@ -119,6 +130,52 @@ Use this when the user wants to improve a specific repository. The output includ
 
 After generating the draft, discuss the recommendations with the user and apply them manually or through the GitHub web UI. Do **not** modify the repository automatically unless the user explicitly asks.
 
+### Beautify Repository README
+
+```bash
+node scripts/github-asset-manager.js beautify --repo <owner/repo-name>
+```
+
+Use this when the user wants a polished, ready-to-use README for a specific repository. The command fetches the repository metadata and existing README, then generates a beautified README that includes badges and preserves the original sections and content.
+
+The output is a draft saved as `README-beautified.md` (or printed to stdout). Review it with the user before replacing the repository's actual README.
+
+To beautify a local README file instead of fetching from GitHub, use `--from-file <path>`:
+
+```bash
+node scripts/github-asset-manager.js beautify --repo <owner/repo-name> --from-file ./README.md
+```
+
+### Multilingual README and Description
+
+```bash
+node scripts/github-asset-manager.js i18n --repo <owner/repo-name> [--langs <codes>]
+```
+
+Use this when the user wants READMEs in multiple languages. The command generates:
+
+- `README.md` in the primary language.
+- `README.<lang>.md` for each additional requested language.
+- Each file includes a language switcher linking to the other translations.
+- A recommended description for the repository About section.
+
+Default languages are `en,zh`. Supported language codes: `en`, `zh`, `ja`, `es`, `de`, `fr`.
+
+Because GitHub only supports one description in the repository About section, the primary language description is recommended. Discuss with the user whether to use it as-is or combine it with another language.
+
+To generate multilingual READMEs from a local file (for example, the output of `beautify`), use `--from-file <path>`:
+
+```bash
+node scripts/github-asset-manager.js beautify --repo <owner/repo-name> --from-file ./README.md --output ./drafts
+node scripts/github-asset-manager.js i18n --repo <owner/repo-name> --langs en,zh,ja --from-file ./drafts/README-beautified.md --output ./drafts
+```
+
+Output files (when `--output <dir>` is used):
+
+- `README.md`
+- `README.zh.md`, etc.
+- `i18n-summary.md` — overview of generated files and the recommended description.
+
 ### Classify GitHub Stars into Lists
 
 ```bash
@@ -177,7 +234,9 @@ Shortcut that runs both `stars` and `repos`. Use this for an overall GitHub heal
 | `--user, -u` | Target GitHub username | `--user octocat` |
 | `--output, -o` | Write output to files in this directory | `--output ./reports` |
 | `--refresh, -r` | Force refresh GitHub API cache | `--refresh` |
-| `--repo` | Repository for draft command | `--repo owner/repo-name` |
+| `--repo` | Repository for draft, beautify, and i18n commands | `--repo owner/repo-name` |
+| `--from-file` | Read README from a local file for `beautify`/`i18n` | `--from-file ./README.md` |
+| `--langs` | Comma-separated language codes for `i18n` | `--langs en,zh,ja` |
 | `--apply` | Apply a classification plan (requires `--plan`) | `--apply --plan ./plan.json` |
 | `--plan` | Path to classification plan JSON | `--plan ./plan.json` |
 

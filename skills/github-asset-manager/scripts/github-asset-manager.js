@@ -6,6 +6,8 @@ const { runRepos } = require('./repos');
 const { generateProfile } = require('./profile');
 const { generateDraft } = require('./drafts');
 const { generateDraft: generateClassifyDraft, applyClassification, generateApplySummary } = require('./classify');
+const { generateBeautifiedReadme } = require('./beautify');
+const { generateI18n } = require('./i18n');
 
 function parseArgs(argv) {
   const args = argv.slice(2);
@@ -20,6 +22,8 @@ function parseArgs(argv) {
     email: null,
     featuredSort: 'stars',
     theme: 'tokyonight',
+    langs: null,
+    fromFile: null,
   };
 
   for (let i = 0; i < args.length; i++) {
@@ -46,6 +50,10 @@ function parseArgs(argv) {
       options.featuredSort = args[++i];
     } else if (arg === '--theme') {
       options.theme = args[++i];
+    } else if (arg === '--langs') {
+      options.langs = args[++i];
+    } else if (arg === '--from-file') {
+      options.fromFile = args[++i];
     } else if (!options.command && !arg.startsWith('-')) {
       options.command = arg;
     }
@@ -65,6 +73,8 @@ Commands:
   repos       Audit your own GitHub repositories
   profile     Generate a GitHub Profile README
   draft       Generate completion draft for a specific repository
+  beautify    Beautify a repository README
+  i18n        Generate multilingual READMEs and descriptions
   audit       Run both stars and repos analysis
   classify    Generate or apply GitHub Star Lists classification
 
@@ -72,10 +82,12 @@ Options:
   --user, -u <username>   Target GitHub user (default: current authenticated user)
   --output, -o <dir>      Write output to files in this directory instead of stdout
   --refresh, -r           Force refresh GitHub API cache
-  --repo <owner/repo>     Required for draft command
+  --repo <owner/repo>     Required for draft, beautify, and i18n commands
+  --from-file <path>      Read README from a local file for beautify/i18n
   --email <email>         Contact email for profile README
   --featured-sort <mode>  Sort featured projects by 'stars' or 'recent'
   --theme <theme>         Stats card theme (default: tokyonight)
+  --langs <list>          Comma-separated language codes for i18n (default: en,zh)
   --apply                 Apply a classification plan (requires --plan)
   --plan <file>           Classification plan JSON file (use - for stdin)
   --help, -h              Show this help
@@ -85,6 +97,10 @@ Examples:
   node scripts/github-asset-manager.js repos --user octocat --refresh
   node scripts/github-asset-manager.js profile --output ./my-profile
   node scripts/github-asset-manager.js draft --repo owner/repo-name
+  node scripts/github-asset-manager.js beautify --repo owner/repo-name
+  node scripts/github-asset-manager.js beautify --repo owner/repo-name --from-file ./README.md
+  node scripts/github-asset-manager.js i18n --repo owner/repo-name --langs en,zh,ja
+  node scripts/github-asset-manager.js i18n --repo owner/repo-name --langs en,zh,ja --from-file ./README.md
   node scripts/github-asset-manager.js audit
   node scripts/github-asset-manager.js classify
   node scripts/github-asset-manager.js classify --apply --plan ./plan.json
@@ -215,6 +231,38 @@ async function main() {
         } else {
           const draft = await generateClassifyDraft(targetUser, { refresh: options.refresh });
           emitOutput(draft, outputDir, 'classify-draft.md', 'Classification draft');
+        }
+        break;
+      }
+
+      case 'beautify': {
+        if (!options.repo) {
+          console.error('Error: --repo is required for beautify command.');
+          process.exit(1);
+        }
+        const readme = await generateBeautifiedReadme(options.repo, { fromFile: options.fromFile });
+        emitOutput(readme, outputDir, 'README-beautified.md', 'Beautified README');
+        break;
+      }
+
+      case 'i18n': {
+        if (!options.repo) {
+          console.error('Error: --repo is required for i18n command.');
+          process.exit(1);
+        }
+        const langs = options.langs ? options.langs.split(',').map(s => s.trim()).filter(Boolean) : undefined;
+        const result = await generateI18n(options.repo, { langs, fromFile: options.fromFile });
+        if (outputDir) {
+          for (const file of result.files) {
+            writeFile(outputDir, file.filename, file.content);
+          }
+          emitOutput(result.summaryMarkdown, outputDir, 'i18n-summary.md', 'i18n summary');
+        } else {
+          console.log(result.summaryMarkdown);
+          for (const file of result.files) {
+            console.log(`\n--- ${file.filename} ---\n`);
+            console.log(file.content);
+          }
         }
         break;
       }
