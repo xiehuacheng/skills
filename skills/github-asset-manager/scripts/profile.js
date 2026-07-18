@@ -6,7 +6,7 @@ const { getSingle } = require('./api');
 const TEMPLATE_PATH = path.resolve(__dirname, '..', 'assets', 'profile-default.md');
 
 function renderFeaturedRepos(repos, options = {}) {
-  const { limit = 6, sort = 'stars' } = options;
+  const { limit = 6, sort = 'stars', style = 'static' } = options;
 
   const featured = repos
     .filter(r => !r.fork && !r.private)
@@ -19,6 +19,32 @@ function renderFeaturedRepos(repos, options = {}) {
     .slice(0, limit);
 
   if (featured.length === 0) return 'No public repositories available.';
+
+  if (style === 'shields') {
+    return featured
+      .map(r => {
+        const owner = encodeURIComponent(r.owner.login);
+        const repo = encodeURIComponent(r.name);
+        const starsBadge = `![Stars](https://img.shields.io/github/stars/${owner}/${repo}?style=flat&logo=github&color=facc15)`;
+        const lang = r.language
+          ? `![Language](https://img.shields.io/badge/-${encodeURIComponent(r.language)}-6e7681?style=flat)`
+          : '';
+        const desc = r.description || 'No description';
+        const badges = [starsBadge, lang].filter(Boolean).join(' ');
+        return `- **[${r.name}](${r.html_url})** ${badges}\n  ${desc}`;
+      })
+      .join('\n\n');
+  }
+
+  if (style === 'pin') {
+    return featured
+      .map(r => {
+        const owner = encodeURIComponent(r.owner.login);
+        const repo = encodeURIComponent(r.name);
+        return `[![${r.name}](https://github-readme-stats.vercel.app/api/pin/?username=${owner}&repo=${repo}&theme=tokyonight)](${r.html_url})`;
+      })
+      .join('\n');
+  }
 
   return featured
     .map(r => {
@@ -59,6 +85,7 @@ async function generateProfile(user, currentUser, options = {}) {
     refresh = false,
     email = null,
     featuredSort = 'stars',
+    featuredStyle = 'static',
     theme = 'tokyonight',
   } = options;
 
@@ -79,7 +106,7 @@ async function generateProfile(user, currentUser, options = {}) {
     .replace(/\{\{name\}\}/g, profile.name || user)
     .replace(/\{\{theme\}\}/g, theme)
     .replace('{{contacts}}', renderContacts(profile, { email }))
-    .replace('{{featuredRepos}}', renderFeaturedRepos(publicRepos, { sort: featuredSort }));
+    .replace('{{featuredRepos}}', renderFeaturedRepos(publicRepos, { sort: featuredSort, style: featuredStyle }));
 }
 
 module.exports = {

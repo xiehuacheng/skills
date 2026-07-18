@@ -81,7 +81,7 @@ After receiving the output, identify the most impactful improvements and ask the
 ### Generate Profile README
 
 ```bash
-node scripts/github-asset-manager.js profile [--user <username>] [--refresh] [--email <email>] [--featured-sort stars|recent] [--theme <theme>]
+node scripts/github-asset-manager.js profile [--user <username>] [--refresh] [--email <email>] [--featured-sort stars|recent] [--featured-style static|shields|pin] [--theme <theme>]
 ```
 
 Use this when the user wants to improve their GitHub profile page. The output is a complete README markdown suitable for the `username/username` repository.
@@ -112,6 +112,7 @@ When presenting each section, use tables or lists so the user can easily approve
 |---|---|---|
 | `--email` | Contact email to show in the README | Read from GitHub profile |
 | `--featured-sort` | Sort featured projects by `stars` or `recent` | `stars` |
+| `--featured-style` | Render featured projects as `static` text, `shields` live badges, or `pin` cards | `static` |
 | `--theme` | Theme for GitHub stats cards | `tokyonight` |
 
 ### Draft Repository Completion
@@ -289,6 +290,7 @@ If the user's intent is already specific (for example, "分类我的 GitHub Star
    - After the user confirms, help them apply metadata changes through the GitHub web UI or `gh` CLI. The `draft` command does not modify repositories automatically; only update metadata on the user's behalf if they explicitly ask.
 4. **Profile README workflow** (`profile`):
    - Align each section with the user one by one before generating.
+   - Choose how featured projects display their star counts: `static` (snapshot at generation time), `shields` (live shields.io badges), or `pin` (live github-readme-stats cards).
    - Show the complete result to the user and discuss any final tweaks.
    - Only push to the profile repository after explicit user confirmation.
 5. **Classify stars** if the user wants to organize their GitHub Star Lists. Always confirm before applying.

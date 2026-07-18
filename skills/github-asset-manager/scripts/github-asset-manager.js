@@ -21,6 +21,7 @@ function parseArgs(argv) {
     plan: null,
     email: null,
     featuredSort: 'stars',
+    featuredStyle: 'static',
     theme: 'tokyonight',
     langs: null,
     fromFile: null,
@@ -48,6 +49,8 @@ function parseArgs(argv) {
       options.email = args[++i];
     } else if (arg === '--featured-sort') {
       options.featuredSort = args[++i];
+    } else if (arg === '--featured-style') {
+      options.featuredStyle = args[++i];
     } else if (arg === '--theme') {
       options.theme = args[++i];
     } else if (arg === '--langs') {
@@ -86,6 +89,7 @@ Options:
   --from-file <path>      Read README from a local file for beautify/i18n
   --email <email>         Contact email for profile README
   --featured-sort <mode>  Sort featured projects by 'stars' or 'recent'
+  --featured-style <mode> Featured project style: 'static', 'shields', or 'pin'
   --theme <theme>         Stats card theme (default: tokyonight)
   --langs <list>          Comma-separated language codes for i18n (asked by the agent)
   --apply                 Apply a classification plan (requires --plan)
@@ -177,6 +181,7 @@ async function main() {
           refresh: options.refresh,
           email: options.email,
           featuredSort: options.featuredSort,
+          featuredStyle: options.featuredStyle,
           theme: options.theme,
         });
         emitOutput(profile, outputDir, 'profile-readme.md', 'Profile README');
