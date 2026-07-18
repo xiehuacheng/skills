@@ -87,7 +87,7 @@ Options:
   --email <email>         Contact email for profile README
   --featured-sort <mode>  Sort featured projects by 'stars' or 'recent'
   --theme <theme>         Stats card theme (default: tokyonight)
-  --langs <list>          Comma-separated language codes for i18n (default: en,zh)
+  --langs <list>          Required for i18n: comma-separated language codes
   --apply                 Apply a classification plan (requires --plan)
   --plan <file>           Classification plan JSON file (use - for stdin)
   --help, -h              Show this help

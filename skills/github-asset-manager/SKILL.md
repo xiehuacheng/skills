@@ -152,14 +152,14 @@ node scripts/github-asset-manager.js beautify --repo <owner/repo-name> --from-fi
 node scripts/github-asset-manager.js i18n --repo <owner/repo-name> [--langs <codes>]
 ```
 
-Use this when the user wants READMEs in multiple languages. The command generates:
+Use this when the user wants READMEs in multiple languages. The command analyzes the original README, detects its source language, and asks the user to pick the target languages via `--langs`. It then generates:
 
-- `README.md` in the primary language.
+- `README.md` in the primary (source) language.
 - `README.<lang>.md` for each additional requested language.
 - Each file includes a language switcher linking to the other translations.
 - A recommended description for the repository About section.
 
-Default languages are `en,zh`. Supported language codes: `en`, `zh`, `ja`, `es`, `de`, `fr`.
+`--langs` is required. Supported language codes: `en`, `zh`, `ja`, `es`, `de`, `fr`. The first code in the list becomes the primary output language; if it does not match the detected source language, the command warns and suggests putting the source language first.
 
 Because GitHub only supports one description in the repository About section, the primary language description is recommended. Discuss with the user whether to use it as-is or combine it with another language.
 
@@ -167,7 +167,7 @@ To generate multilingual READMEs from a local file (for example, the output of `
 
 ```bash
 node scripts/github-asset-manager.js beautify --repo <owner/repo-name> --from-file ./README.md --output ./drafts
-node scripts/github-asset-manager.js i18n --repo <owner/repo-name> --langs en,zh,ja --from-file ./drafts/README-beautified.md --output ./drafts
+node scripts/github-asset-manager.js i18n --repo <owner/repo-name> --langs zh,en,ja --from-file ./drafts/README-beautified.md --output ./drafts
 ```
 
 Output files (when `--output <dir>` is used):

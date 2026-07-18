@@ -4,7 +4,6 @@ const { getSingle } = require('./api');
 const { fetchReadme } = require('./drafts');
 const report = require('./report');
 
-const DEFAULT_LANGS = ['en', 'zh'];
 const SUPPORTED_LANGS = new Set(['en', 'zh', 'ja', 'es', 'de', 'fr']);
 
 const LANG_DISPLAY = {
@@ -192,19 +191,60 @@ function parseRepoFullName(repoFullName) {
 }
 
 function normalizeLangs(inputLangs) {
-  let langs = inputLangs || DEFAULT_LANGS;
+  if (!inputLangs) {
+    return null;
+  }
 
+  let langs = inputLangs;
   if (typeof langs === 'string') {
     langs = langs.split(',').map(s => s.trim()).filter(Boolean);
   }
 
-  langs = langs.filter(lang => SUPPORTED_LANGS.has(lang));
+  return langs.filter(lang => SUPPORTED_LANGS.has(lang));
+}
 
-  if (langs.length === 0) {
-    return [...DEFAULT_LANGS];
-  }
+function buildSupportedLangsList() {
+  return Array.from(SUPPORTED_LANGS)
+    .map(code => `${code} (${LANG_DISPLAY[code]})`)
+    .join(', ');
+}
 
-  return langs;
+function detectSourceLanguage(readmeText) {
+  if (!readmeText) return 'en';
+
+  // Remove fenced code blocks, inline code, link URLs and standalone URLs so they
+  // do not skew detection toward English.
+  const naturalText = readmeText
+    .replace(/```[\s\S]*?```/g, '')
+    .replace(/`[^`]+`/g, '')
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+    .replace(/https?:\/\/[^\s)]+/g, '');
+
+  const text = naturalText.replace(/\s/g, '');
+  if (text.length === 0) return 'en';
+
+  const counts = {
+    zh: (text.match(/[\u4e00-\u9fa5]/g) || []).length,
+    ja: (text.match(/[\u3040-\u309f\u30a0-\u30ff]/g) || []).length,
+    ko: (text.match(/[\uac00-\ud7af]/g) || []).length,
+    en: (text.match(/[a-zA-Z]/g) || []).length,
+  };
+
+  // CJK characters carry more information per character than Latin letters.
+  const weighted = {
+    zh: counts.zh * 3,
+    ja: counts.ja * 3,
+    ko: counts.ko * 3,
+    en: counts.en,
+  };
+
+  const max = Object.entries(weighted).sort((a, b) => b[1] - a[1])[0];
+  if (max[1] === 0) return 'en';
+
+  if (max[0] === 'ja') return 'ja';
+  if (max[0] === 'ko') return 'en'; // Not supported as primary, fallback to en
+  if (max[0] === 'zh') return 'zh';
+  return 'en';
 }
 
 function classifyHeading(title) {
@@ -406,13 +446,32 @@ function buildSummary(repoFullName, files, descriptions) {
 
 async function generateI18n(repoFullName, options = {}) {
   const { owner, repo: repoName } = parseRepoFullName(repoFullName);
-  const langs = normalizeLangs(options.langs);
-  const primaryLang = langs[0];
 
   const repo = await getSingle(`/repos/${owner}/${repoName}`);
   const readmeText = options.fromFile
     ? fs.readFileSync(path.resolve(options.fromFile), 'utf8')
     : await fetchReadme(owner, repoName);
+  const sourceLang = detectSourceLanguage(readmeText);
+
+  const langs = normalizeLangs(options.langs);
+  if (!langs || langs.length === 0) {
+    throw new Error(
+      `Please choose languages for the multilingual README.\n` +
+      `Detected source language: ${LANG_DISPLAY[sourceLang]} (${sourceLang})\n` +
+      `Supported languages: ${buildSupportedLangsList()}\n` +
+      `Example: --langs ${sourceLang === 'zh' ? 'zh,en,ja' : 'en,zh,ja'}`
+    );
+  }
+
+  const primaryLang = langs[0];
+  if (primaryLang !== sourceLang) {
+    console.warn(
+      `Warning: the original README appears to be in ${LANG_DISPLAY[sourceLang]}, ` +
+      `but the primary output language is set to ${LANG_DISPLAY[primaryLang]}. ` +
+      `Consider using --langs ${sourceLang},${langs.filter(l => l !== sourceLang).join(',')} so the source language stays as README.md.`
+    );
+  }
+
   const parsed = parseReadmeSections(readmeText);
 
   const files = [];
