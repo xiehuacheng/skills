@@ -15,26 +15,26 @@
 
 ## インストール
 
-对 agent 说一句话即可安装：
+エージェントに一言話すだけでインストールできます：
 
 ```text
 帮我安装这个仓库下的所有 skill： xiehuacheng/skills@hot-skills
 ```
 
-或者
+または
 
 ```text
 帮我从这个仓库安装 skill： xiehuacheng/skills@hot-skills
 只安装：（你想要安装的 skill 名称）
 ```
 
-或直接使用 [skills.sh](https://skills.sh/) CLI：
+または [skills.sh](https://skills.sh/) CLI を直接使用：
 
 ```bash
 npx skills add xiehuacheng/skills@hot-skills
 ```
 
-本地测试时也可以直接指定路径：
+ローカルでテストする際は、直接パスを指定することもできます：
 
 ```bash
 npx skills add /path/to/skills@hot-skills
@@ -44,35 +44,35 @@ npx skills add /path/to/skills@hot-skills
 
 ### hot-skills
 
-[`hot-skills`](./skills/hot-skills) 用于发现当前热门的 Agent Skills。它聚合了多个数据源的信号：
+[`hot-skills`](./skills/hot-skills) は、現在注目されている Agent Skill を発見するために使われます。複数のデータソースからの信号を集約します：
 
-- **[agentskills.media](https://agentskills.media)** — GitHub stars 与分类
-- **skills-rank.com** — 单 skill 排名得分
-- **skills.sh** — 真实安装量（通过无头浏览器抓取公开排行榜）
+- **[agentskills.media](https://agentskills.media)** — GitHub stars と分類
+- **skills-rank.com** — 単一 skill のランキングスコア
+- **skills.sh** — 実際のインストール数（ヘッドレスブラウザで公開ランキングを取得）
 
-支持按分类和别名筛选、关键词搜索、查看 24 小时趋势榜，以及输出 JSON；并按 `owner/repo@skill-name` 精确去重，合并多源指标。适合回答“现在有什么热门 skill？”“前端热门 skill 有哪些？”这类问题。
+カテゴリやエイリアスによる絞り込み、キーワード検索、24 時間のトレンドランキングの確認、JSON 出力に対応しています。また、`owner/repo@skill-name` で正確に重複を排除し、複数ソースの指標を統合します。「今、人気の skill は何？」「フロントエンドで人気の skill は何？」といった質問に答えるのに適しています。
 
 ### init-llm-wiki
 
-[`init-llm-wiki`](./skills/init-llm-wiki) 帮助用户为一个新领域快速启动并维护 Karpathy 风格的 LLM Wiki。
+[`init-llm-wiki`](./skills/init-llm-wiki) は、新しい領域向けに Karpathy スタイルの LLM Wiki を迅速に立ち上げ、維持することを支援します。
 
-它遵循 Google Cloud Open Knowledge Format（OKF）v0.1，Obsidian 优先：自动生成 `00-Raw/`、`01-Wiki/`、`02-Areas/`（或 `02-Module/`）目录，创建根 `index.md`、`log.md` 与 agent schema 文档，并统一 frontmatter 和 `[[wikilink]]` 链接规范。Ingest 流程强调先与用户讨论关键收获、再规划页面方案，避免把策展变成批处理。
+Google Cloud Open Knowledge Format（OKF）v0.1 に準拠し、Obsidian 優先で動作します：`00-Raw/`、`01-Wiki/`、`02-Areas/`（または `02-Module/`）ディレクトリを自動生成し、ルートの `index.md`、`log.md`、agent schema ドキュメントを作成し、frontmatter と `[[wikilink]]` リンク規約を統一します。Ingest フローでは、まずユーザーと主要な学びについて議論し、次にページ構成を計画することを重視し、キュレーションをバッチ処理にしないようにします。
 
 ### github-asset-manager
 
-[`github-asset-manager`](./skills/github-asset-manager) 用于整理和改善 GitHub 数字资产。
+[`github-asset-manager`](./skills/github-asset-manager) は、GitHub のデジタル資産を整理し、改善するために使われます。
 
-它通过 GitHub CLI 或 `GITHUB_TOKEN` 读取数据，提供多个本地分析命令：分析并分类 GitHub Stars、审计个人仓库健康度、生成 GitHub Profile README、为指定仓库补全描述与 topics、以及将 Stars 整理进 GitHub Lists。所有写操作都需要用户明确确认，默认只输出结构化 Markdown 报告。
+GitHub CLI または `GITHUB_TOKEN` を使ってデータを読み取り、複数のローカル分析コマンドを提供します：GitHub Stars の分析と分類、個人リポジトリの健全性監査、GitHub Profile README の生成、指定リポジトリの description と topics の補完、Stars を GitHub Lists に整理する機能です。すべての書き込み操作にはユーザーの明示的な確認が必要で、デフォルトでは構造化された Markdown レポートのみを出力します。
 
 ### creating-skills
 
-[`creating-skills`](./skills/creating-skills) 用于创建新的 Agent Skill。
+[`creating-skills`](./skills/creating-skills) は、新しい Agent Skill を作成するために使われます。
 
-它通过协作式头脑风暴帮助用户澄清 skill 的场景、触发时机和范围，提供命名与结构建议，并在每个关键节点停下来等用户确认。强调渐进式披露、人在回路中的决策，以及 skill 工作流中脚本优先通过 stdin/stdout 组合而非生成中间文件。
+協働型のブレインストーミングを通じて、skill のユースケース、トリガーとなるタイミング、範囲を明確にし、命名と構造の提案を行い、それぞれの重要なポイントでユーザーに確認を求めます。漸進的な情報開示、ヒト・イン・ザ・ループ（人在回路）における意思決定、および skill ワークフローでは中間ファイルを生成するのではなく、スクリプトを stdin/stdout で組み合わせることを優先することを重視しています。
 
 ## 貢献
 
-欢迎提交新的 skill 或改进现有 skill。每个 skill 请单独放在 `skills/<skill-name>/` 目录下，并包含 `SKILL.md` 说明文件。
+新しい skill の追加や既存 skill の改善を歓迎します。各 skill は `skills/<skill-name>/` ディレクトリに個別に配置し、`SKILL.md` 説明ファイルを含めてください。
 
 ## ライセンス
 

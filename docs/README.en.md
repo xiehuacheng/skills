@@ -15,26 +15,26 @@
 
 ## Installation
 
-对 agent 说一句话即可安装：
+Install with a single sentence to your agent:
 
 ```text
 帮我安装这个仓库下的所有 skill： xiehuacheng/skills@hot-skills
 ```
 
-或者
+Or:
 
 ```text
 帮我从这个仓库安装 skill： xiehuacheng/skills@hot-skills
 只安装：（你想要安装的 skill 名称）
 ```
 
-或直接使用 [skills.sh](https://skills.sh/) CLI：
+Or use the [skills.sh](https://skills.sh/) CLI directly:
 
 ```bash
 npx skills add xiehuacheng/skills@hot-skills
 ```
 
-本地测试时也可以直接指定路径：
+For local testing, you can also specify a path directly:
 
 ```bash
 npx skills add /path/to/skills@hot-skills
@@ -44,35 +44,35 @@ npx skills add /path/to/skills@hot-skills
 
 ### hot-skills
 
-[`hot-skills`](./skills/hot-skills) 用于发现当前热门的 Agent Skills。它聚合了多个数据源的信号：
+[`hot-skills`](./skills/hot-skills) is used to discover currently popular Agent Skills. It aggregates signals from multiple data sources:
 
-- **[agentskills.media](https://agentskills.media)** — GitHub stars 与分类
-- **skills-rank.com** — 单 skill 排名得分
-- **skills.sh** — 真实安装量（通过无头浏览器抓取公开排行榜）
+- **[agentskills.media](https://agentskills.media)** — GitHub stars and categories
+- **skills-rank.com** — per-skill ranking score
+- **skills.sh** — real install counts (scraped from the public leaderboard via a headless browser)
 
-支持按分类和别名筛选、关键词搜索、查看 24 小时趋势榜，以及输出 JSON；并按 `owner/repo@skill-name` 精确去重，合并多源指标。适合回答“现在有什么热门 skill？”“前端热门 skill 有哪些？”这类问题。
+Supports filtering by category and alias, keyword search, viewing the 24-hour trending list, and JSON output; it deduplicates precisely by `owner/repo@skill-name` and merges multi-source metrics. Great for answering questions like “What hot skills are there right now?” and “What are the popular front-end skills?”
 
 ### init-llm-wiki
 
-[`init-llm-wiki`](./skills/init-llm-wiki) 帮助用户为一个新领域快速启动并维护 Karpathy 风格的 LLM Wiki。
+[`init-llm-wiki`](./skills/init-llm-wiki) helps users quickly bootstrap and maintain a Karpathy-style LLM Wiki for a new domain.
 
-它遵循 Google Cloud Open Knowledge Format（OKF）v0.1，Obsidian 优先：自动生成 `00-Raw/`、`01-Wiki/`、`02-Areas/`（或 `02-Module/`）目录，创建根 `index.md`、`log.md` 与 agent schema 文档，并统一 frontmatter 和 `[[wikilink]]` 链接规范。Ingest 流程强调先与用户讨论关键收获、再规划页面方案，避免把策展变成批处理。
+It follows the Google Cloud Open Knowledge Format (OKF) v0.1 with an Obsidian-first approach: it auto-generates the `00-Raw/`, `01-Wiki/`, `02-Areas/` (or `02-Module/`) directories, creates the root `index.md`, `log.md`, and agent schema docs, and unifies frontmatter and `[[wikilink]]` linking conventions. The ingest workflow emphasizes discussing key takeaways with the user first, then planning the page structure, so curation doesn't become a batch process.
 
 ### github-asset-manager
 
-[`github-asset-manager`](./skills/github-asset-manager) 用于整理和改善 GitHub 数字资产。
+[`github-asset-manager`](./skills/github-asset-manager) is used to organize and improve GitHub digital assets.
 
-它通过 GitHub CLI 或 `GITHUB_TOKEN` 读取数据，提供多个本地分析命令：分析并分类 GitHub Stars、审计个人仓库健康度、生成 GitHub Profile README、为指定仓库补全描述与 topics、以及将 Stars 整理进 GitHub Lists。所有写操作都需要用户明确确认，默认只输出结构化 Markdown 报告。
+It reads data via the GitHub CLI or `GITHUB_TOKEN`, and provides several local analysis commands: analyze and categorize GitHub Stars, audit personal repository health, generate a GitHub Profile README, fill in descriptions and topics for a given repository, and organize Stars into GitHub Lists. All write operations require explicit user confirmation; by default it only outputs structured Markdown reports.
 
 ### creating-skills
 
-[`creating-skills`](./skills/creating-skills) 用于创建新的 Agent Skill。
+[`creating-skills`](./skills/creating-skills) is used to create new Agent Skills.
 
-它通过协作式头脑风暴帮助用户澄清 skill 的场景、触发时机和范围，提供命名与结构建议，并在每个关键节点停下来等用户确认。强调渐进式披露、人在回路中的决策，以及 skill 工作流中脚本优先通过 stdin/stdout 组合而非生成中间文件。
+It helps users clarify a skill's scenario, trigger timing, and scope through collaborative brainstorming, provides naming and structure suggestions, and pauses at every key decision point for user confirmation. It emphasizes progressive disclosure, human-in-the-loop decisions, and skill workflows where scripts are composed via stdin/stdout rather than generating intermediate files.
 
 ## Contributing
 
-欢迎提交新的 skill 或改进现有 skill。每个 skill 请单独放在 `skills/<skill-name>/` 目录下，并包含 `SKILL.md` 说明文件。
+New skills and improvements to existing skills are welcome. Each skill should be placed in its own `skills/<skill-name>/` directory and include a `SKILL.md` documentation file.
 
 ## License
 
