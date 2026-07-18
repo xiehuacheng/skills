@@ -1,6 +1,9 @@
 ---
 name: creating-skills
 description: Use when the user wants to create a new skill, write a SKILL.md, scaffold skill structure, improve an existing skill, or discuss skill design. Triggers on phrases like "create a skill", "new skill", "write a skill", "skill design", "validate skill", or when the user describes a reusable workflow, technique, or domain guide they want Kimi Code to learn.
+metadata:
+  author: xiehuacheng
+  version: "1.1.0"
 ---
 
 # Creating Skills
@@ -17,6 +20,22 @@ Good skills are:
 - **Trigger-aware** — loaded only when the task matches
 - **Concise** — every token justifies its cost
 - **Composable** — scripts prefer stdin/stdout over intermediate files
+
+## What a Skill Must Declare
+
+Every skill must make its boundaries and defaults obvious to the agent. Add a short section near the top of `SKILL.md` that covers:
+
+- **Can do** — concrete capabilities the skill provides.
+- **Cannot do (without explicit approval)** — operations the skill must never perform automatically.
+- **Default behavior** — whether commands are read-only by default, what requires user confirmation, and what assumptions are forbidden.
+
+Example from a GitHub-facing skill:
+
+> **Can do:** read public and private GitHub data, generate reports, draft READMEs and metadata recommendations.  
+> **Cannot do:** push commits, update repository metadata, or delete Star Lists without explicit user approval.  
+> **Default behavior:** all commands are read-only. Any write operation requires the user to confirm the exact change.
+
+This prevents the agent from overstepping and makes approval gates explicit.
 
 ## Core Principles
 
@@ -78,6 +97,31 @@ Guidelines:
 - Avoid asking the user to reply to long lists of free-text questions
 - For binary or scoped decisions, use single-choice or multi-choice prompts
 - Fall back to free-text only when the answer is genuinely open-ended
+
+### 7. Document Boundaries & Defaults Explicitly
+
+The agent using your skill has no external context. If a default value, a required permission, or an approval gate is not written in `SKILL.md`, the agent will guess — and often guess wrong.
+
+Document:
+
+- Required tools, versions, and authentication scopes
+- Default values and when they may be overridden
+- Operations that require explicit user approval
+- Assumptions the agent must not make (e.g., "do not auto-select languages")
+
+Keep documentation and implementation in sync. When you change code, update `SKILL.md` and bump the skill `version`.
+
+### 8. Provide Agent Checklists & Conversational Patterns
+
+A workflow skill should teach the agent *how* to work with the user, not just *what* commands to run.
+
+Include:
+
+- **A standard execution workflow** — e.g., authenticate → clarify intent → run command → summarize → propose next step → get approval → apply.
+- **A pre-run checklist** — authentication, scope, target, expected output, and whether approval is needed.
+- **Conversational patterns** — how to propose options, pause at decision points, confirm exact actions, and present results.
+
+Example pattern: instead of "Which languages do you want?", say "I detected the README is in Chinese. I recommend Chinese as primary plus English and Japanese. Does that work, or would you prefer a different set?"
 
 ## Skill Creation Workflow
 
@@ -148,7 +192,13 @@ Write the complete SKILL.md content in the conversation first. Include:
 - Frontmatter with approved `name` and `description`
 - Overview
 - When to use / triggers
-- Core instructions
+- **Can do / Cannot do / Default behavior** declarations
+- **Pre-run checks** (authentication, scopes, environment, target)
+- **Core instructions** with exact commands and options
+- **User approval points** — when must the agent stop and ask
+- **Expected output examples** so the agent knows what success looks like
+- **Error handling & edge cases** — common failures and how to recover
+- **Sub-agent prompts** if the skill delegates work to sub-agents
 - Any resource references
 
 Do **not** write it to disk yet. Wait for user approval.
@@ -164,13 +214,29 @@ Once the draft is approved, use the location agreed upon in Step 3:
 
 ### Step 7: Validate & Iterate
 
-Run:
+Run structural validation:
 
 ```bash
 scripts/quick_validate.py <path/to/skill-folder>
 ```
 
-Fix reported issues. For complex skills, forward-test by dispatching subagents with realistic requests. Iterate based on results and user feedback.
+Fix reported issues. Then run quality checks appropriate to the skill type:
+
+| Skill Type | Validation Approach |
+|---|---|
+| Reference / technique | `quick_validate.py` + read-through for accuracy |
+| Workflow with scripts | `quick_validate.py` + run each documented command + inspect output |
+| Multi-step / sub-agent workflow | `quick_validate.py` + dispatch a sub-agent with a realistic end-to-end request + review its report |
+| Write-operation skill | Verify every write path requires explicit user approval and shows the result |
+
+For sub-agent testing, give the sub-agent:
+
+- The skill root path
+- A realistic user request
+- A checklist of things to verify (documentation clarity, command success, output quality, edge cases)
+- Instructions to report issues, not fix them
+
+Iterate based on sub-agent findings and user feedback. Bump the skill `version` whenever behavior changes.
 
 ## Skill Standards
 
@@ -197,3 +263,37 @@ Consult that file when drafting or reviewing a skill.
 - **`scripts/init_skill.py`** — Scaffold a new skill directory.
 - **`scripts/quick_validate.py`** — Validate SKILL.md structure, frontmatter, and standards.
 - **`references/skill-standards.md`** — Detailed standards for frontmatter, writing style, directory structure, and naming.
+
+## Appendix: Skill Validation Checklist
+
+Use this checklist when reviewing or testing a skill before shipping it.
+
+### Documentation
+
+- [ ] Frontmatter `name` and `description` are present and under 1024 characters.
+- [ ] `description` explains what the skill is for and what user phrases trigger it.
+- [ ] The body declares **Can do / Cannot do / Default behavior**.
+- [ ] Every command has a clear invocation example.
+- [ ] Pre-run checks (authentication, scopes, environment) are documented.
+- [ ] Approval points for write operations are explicit.
+- [ ] Expected output shape is shown with examples.
+- [ ] Common errors and recovery steps are listed.
+- [ ] Sub-agent prompts are provided if the skill delegates work.
+
+### Implementation
+
+- [ ] Scripts run from the skill root without requiring global installs.
+- [ ] Commands produce the output promised in the documentation.
+- [ ] Default values in code match the defaults in `SKILL.md`.
+- [ ] Write operations do not execute without explicit user approval.
+- [ ] Temporary files are cleaned up unless the user asked to keep them.
+- [ ] Cache behavior, if any, is documented and manually clearable.
+
+### Quality & Testing
+
+- [ ] `scripts/quick_validate.py <skill-dir>` passes.
+- [ ] Each documented command was run successfully.
+- [ ] Output artifacts match the expected shape and content.
+- [ ] Edge cases were tested (missing inputs, bad auth, unwritable paths).
+- [ ] For workflow skills, a sub-agent completed an end-to-end realistic request and reported no blockers.
+- [ ] The skill `version` was bumped if behavior changed.

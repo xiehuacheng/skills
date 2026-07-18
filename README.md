@@ -62,7 +62,7 @@ npx skills add /path/to/skills@hot-skills
 
 [`github-asset-manager`](./skills/github-asset-manager) 用于整理和改善 GitHub 数字资产。
 
-它通过 GitHub CLI 或 `GITHUB_TOKEN` 读取数据，提供多个本地分析命令：分析并分类 GitHub Stars、审计个人仓库健康度、生成 GitHub Profile README、为指定仓库补全描述与 topics、以及将 Stars 整理进 GitHub Lists。生成 Profile README 时可自定义 Tech Stack、Featured Projects 的展示风格（`static` / `shields` / `compact` / `highlight`）与数量，并且 Tech Stack 和具体高亮哪些仓库都需要在生成前与用户确认。所有写操作都需要用户明确确认，默认只输出结构化 Markdown 报告。
+它通过 GitHub CLI 或 `GITHUB_TOKEN` 读取数据，提供多个本地分析命令：分析并分类 GitHub Stars、审计个人仓库健康度、生成 GitHub Profile README、润色仓库 README、生成多语言 README、为指定仓库补全描述与 topics，以及将 Stars 整理进 GitHub Lists。使用时会先检查认证与权限 scope，生成内容后展示给用户，所有写操作（更新 About、推送 README、应用 Star Lists）都需要用户明确确认，默认只输出结构化 Markdown 报告。
 
 ### cv-builder
 
@@ -72,9 +72,9 @@ npx skills add /path/to/skills@hot-skills
 
 ### creating-skills
 
-[`creating-skills`](./skills/creating-skills) 用于创建新的 Agent Skill。
+[`creating-skills`](./skills/creating-skills) 用于创建、改进和验证 Agent Skill。
 
-它通过协作式头脑风暴帮助用户澄清 skill 的场景、触发时机和范围，提供命名与结构建议，并在每个关键节点停下来等用户确认。强调渐进式披露、人在回路中的决策，以及 skill 工作流中脚本优先通过 stdin/stdout 组合而非生成中间文件。
+它通过协作式头脑风暴帮助用户澄清 skill 的场景、触发时机和范围，提供命名与结构建议，并在每个关键节点停下来等用户确认。除了生成 SKILL.md 和目录结构，它还强调：明确声明 skill 的能力边界与默认行为、为使用 skill 的 agent 提供执行检查清单和对话模式、在 SKILL.md 中写明用户批准点与预期输出示例，以及通过 `quick_validate.py` 和 sub-agent 端到端测试来验证 skill 质量。
 
 ## 贡献
 
