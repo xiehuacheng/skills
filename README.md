@@ -76,6 +76,12 @@ npx skills add /path/to/skills@hot-skills
 
 它通过协作式头脑风暴帮助用户澄清 skill 的场景、触发时机和范围，提供命名与结构建议，并在每个关键节点停下来等用户确认。除了生成 SKILL.md 和目录结构，它还强调：明确声明 skill 的能力边界与默认行为、为使用 skill 的 agent 提供执行检查清单和对话模式、在 SKILL.md 中写明用户批准点与预期输出示例，以及通过 `quick_validate.py` 和 sub-agent 端到端测试来验证 skill 质量。
 
+### effort-audit
+
+[`effort-audit`](./skills/effort-audit) 用于自动检查当前项目或任务是否与用户的长期方向一致。
+
+在项目对话开始时，它会自动读取 `~/.config/effort-audit/profile.md` 中的个人方向配置，并判断当前任务是否偏离。如果偏离达到中度或以上，它会暂停并列出具体原因，提供"继续""调整方向""暂存"等选项，帮助用户把精力拉回主攻领域。首次使用时，它会通过一次性访谈生成个人方向配置。
+
 ## 贡献
 
 欢迎提交新的 skill 或改进现有 skill。每个 skill 请单独放在 `skills/<skill-name>/` 目录下，并包含 `SKILL.md` 说明文件。
