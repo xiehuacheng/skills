@@ -22,6 +22,7 @@ Avoid embedding workflow summaries in `description`. The description should help
 - Keep it focused; move heavy reference material to `references/`
 - Use code examples for technical skills
 - Include a "When NOT to use" section if boundaries matter
+- Write the authoritative `SKILL.md` in English by default. Generate translated copies as `SKILL.<lang>.md` only when needed.
 
 ## Declaring Boundaries and Defaults
 

@@ -56,6 +56,7 @@ Identify:
 - Skill type: workflow, technique, reference, or tool integration
 - The weakest assumption in the user's request
 - The core tone or feel the skill should have — e.g., ask the user for help, expand its own capabilities, guard boundaries, coach the user
+- Any existing built-in or user skills in the same domain; if one exists, read it first and be ready to explain how the new skill differs
 
 If the request is large, propose decomposition before detailing anything.
 
@@ -76,7 +77,7 @@ Before asking for approval, list 2-3 realistic ways the scope could fail or be m
 
 **If the user says "include everything," push back.** Broad scopes need risk tiers. Propose a tiered approach and confirm.
 
-Present the scope, risks, and proposed description to the user. Wait for approval.
+**Present the content before asking for a choice.** Output the full scope summary, risks, and proposed `description` to the chat as plain text so the user can read and edit it. Then use `AskUserQuestion` only to collect the approval choice. Do not embed the scope text inside the question itself.
 
 ### Step 3: Choose Name & Structure
 
@@ -89,12 +90,16 @@ Present the scope, risks, and proposed description to the user. Wait for approva
 
 If the current project is a skills collection or the user has asked to "push" the skill, default to project scope. Otherwise, ask the user to choose.
 
-Then propose 2-3 naming options with rationale:
+**First ask for a naming strategy.** Do not jump straight to 2-3 specific names; the user's mental model may not match the options you pick. Ask which strategy fits best:
 
-| Form | Example | Best For |
-|------|---------|----------|
+| Strategy | Example | Best For |
+|----------|---------|----------|
 | Verb-led / gerund | `creating-skills`, `writing-plans` | Process, technique, workflow skills |
 | Noun / domain | `frontend-design`, `kimi-webbridge` | Reference, domain, tool-kit skills |
+| Branded / homophone | `gogoal`, `go-goal-go` | Distinctive, memorable skills |
+| Other | — | When the user has a specific name or pattern in mind |
+
+Once the user picks a strategy (or says "Other"), propose 2-3 concrete names within that strategy. If the user chose "Other", ask what feeling, reference, or sound they have in mind before proposing names.
 
 Also propose the directory structure:
 
@@ -138,7 +143,11 @@ Do **not** write it to disk yet.
 
 **Keep the draft concise.** Move dense examples and tables to `references/`; summarize them in the draft.
 
+**Draft `SKILL.md` in English by default.** This keeps the authoritative version consistent across skills and lets a translation skill generate `SKILL.<lang>.md` copies later. Only draft in another language if the user explicitly asks for it.
+
 Before asking for approval, append a short "Remaining assumptions" section. List 1-3 assumptions that, if wrong, would require redesign. Every default behavior that could surprise the user should appear here. See `references/core-principles.md` for examples.
+
+**Explicitly ask the user to confirm or challenge the remaining assumptions.** Do not treat the list as fine print. If any assumption is wrong, redesign before moving to Step 6.
 
 Wait for user approval.
 
@@ -162,6 +171,8 @@ scripts/quick_validate.py <path/to/skill-folder>
 ```
 
 Fix reported issues. Then follow the type-specific validation approach and pre-ship checklist in `references/validation-checklist.md`. Iterate based on findings and user feedback. Bump the skill `version` whenever behavior changes.
+
+**After validation passes, propose a forward-test.** Give the skill a realistic user request and check that it triggers, follows its own workflow, and produces output consistent with its declared boundaries. Fix anything that contradicts the SKILL.md before considering the task done.
 
 ## Quick Reference
 

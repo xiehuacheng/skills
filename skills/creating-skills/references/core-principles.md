@@ -86,6 +86,8 @@ Guidelines:
 - For binary or scoped decisions, use single-choice or multi-choice prompts
 - Fall back to free-text only when the answer is genuinely open-ended
 
+**Important: structured interaction is for collecting choices, not for displaying content that must be read.** If the user needs to review a scope summary, a SKILL.md draft, or a list of risks, output that text to the chat first, then use `AskUserQuestion` only for the approval or selection. Never embed long reviewable content inside the question field itself.
+
 ## 8. Document Boundaries & Defaults Explicitly
 
 The agent using your skill has no external context. Document required tools, default values, approval gates, and forbidden assumptions in `SKILL.md`. See `references/skill-standards.md` for the full list.
