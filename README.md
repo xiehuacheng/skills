@@ -82,6 +82,12 @@ npx skills add /path/to/skills@hot-skills
 
 在项目对话开始时，它会自动读取 `~/.config/effort-audit/profile.md` 中的个人方向配置，并判断当前任务是否偏离。如果偏离达到中度或以上，它会暂停并列出具体原因，提供"继续""调整方向""暂存"等选项，帮助用户把精力拉回主攻领域。首次使用时，它会通过一次性访谈生成个人方向配置。
 
+### ask-for-tools
+
+[`ask-for-tools`](./skills/ask-for-tools) 用于在 agent 遇到工具边界时主动向用户索要工具，而不是蛮干。
+
+它在新任务开始或执行中卡住时触发，先自检工具是否已存在；若不存在，则向用户清晰说明原因、替代方案和"提供工具 / 尝试降级 / 停止任务"三个选项。适用于 MCP server、CLI 工具、Python/Node 包、API 密钥、系统权限和本地文件等场景。
+
 ## 贡献
 
 欢迎提交新的 skill 或改进现有 skill。每个 skill 请单独放在 `skills/<skill-name>/` 目录下，并包含 `SKILL.md` 说明文件。
