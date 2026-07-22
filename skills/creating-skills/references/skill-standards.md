@@ -23,6 +23,27 @@ Avoid embedding workflow summaries in `description`. The description should help
 - Use code examples for technical skills
 - Include a "When NOT to use" section if boundaries matter
 
+## Declaring Boundaries and Defaults
+
+Every skill must declare its boundaries near the top of `SKILL.md`:
+
+- **Can do** — concrete capabilities the skill provides.
+- **Cannot do (without explicit approval)** — operations the skill must never perform automatically.
+- **Default behavior** — whether commands are read-only by default, what requires user confirmation, and what assumptions are forbidden.
+
+Example for a GitHub-facing skill:
+
+> **Can do:** read public and private GitHub data, generate reports, draft READMEs and metadata recommendations.  
+> **Cannot do:** push commits, update repository metadata, or delete Star Lists without explicit user approval.  
+> **Default behavior:** all commands are read-only. Any write operation requires the user to confirm the exact change.
+
+Also document:
+
+- Required tools, versions, and authentication scopes
+- Default values and when they may be overridden
+- Operations that require explicit user approval
+- Assumptions the agent must not make (e.g., "do not auto-select languages")
+
 ## Directory & Resource Rules
 
 - Only create resource directories that are actually used

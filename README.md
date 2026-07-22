@@ -74,7 +74,7 @@ npx skills add /path/to/skills@hot-skills
 
 [`creating-skills`](./skills/creating-skills) 用于创建、改进和验证 Agent Skill。
 
-它通过协作式头脑风暴帮助用户澄清 skill 的场景、触发时机和范围，提供命名与结构建议，并在每个关键节点停下来等用户确认。除了生成 SKILL.md 和目录结构，它还强调：明确声明 skill 的能力边界与默认行为、为使用 skill 的 agent 提供执行检查清单和对话模式、在 SKILL.md 中写明用户批准点与预期输出示例，以及通过 `quick_validate.py` 和 sub-agent 端到端测试来验证 skill 质量。
+它通过协作式头脑风暴帮助用户澄清 skill 的场景、触发时机和范围，在每个关键节点停下来等用户确认，并在批准前主动挑战最脆弱的假设。除了生成 SKILL.md 和目录结构，它还强调：先确认安装位置、明确声明能力边界与默认行为、为使用 skill 的 agent 提供执行检查清单和对话模式、在 SKILL.md 中写明用户批准点与预期输出示例，以及通过 `quick_validate.py` 和 sub-agent 端到端测试来验证 skill 质量。
 
 ### effort-audit
 
