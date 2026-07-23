@@ -35,6 +35,9 @@ Where `skill-standards.md` and `core-principles.md` describe the *correct* shape
 - **Writing to disk before approval.** Step 5's whole job is to land content in the chat. The user reads, edits, approves. Disk writes come in Step 6.
 - **Drafting in a non-English language by default.** If the user explicitly requested another language, do that. Otherwise English.
 - **Apologizing for length / repeating facts in different words.** Each unique fact should appear once; cross-reference rather than restate. Cut filler, not real guidance.
+- **Splitting to fake-shrink.** Moving content from `SKILL.md` to `references/` to clear a word-count warning is cosmetic, not compression. Verify total `SKILL.md + references/` volume actually decreased.
+- **Documenting unimplemented routes.** `references/` describing features that do not exist in code misleads the agent into attempting them. Either build the feature or do not reference it.
+- **Embedding integration with other skills.** A skill should not describe how it composes with a sibling skill. Integration belongs at the orchestrator layer; each skill stays focused on its own scope.
 
 ## Step 6 · Implement
 

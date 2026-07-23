@@ -3,7 +3,7 @@ name: creating-skills
 description: Use when the user wants to create a new skill, write a SKILL.md, scaffold skill structure, improve an existing skill, or discuss skill design. Triggers on phrases like "create a skill", "new skill", "write a skill", "skill design", "validate skill", or when the user describes a reusable workflow, technique, or domain guide they want Kimi Code to learn.
 metadata:
   author: xiehuacheng
-  version: "1.6.0"
+  version: "1.7.0"
 ---
 
 # Creating Skills
@@ -34,6 +34,7 @@ Every skill must declare near the top of `SKILL.md`: **Can do** (capabilities), 
 4. **Standards-first design** — apply `references/skill-standards.md` by default.
 5. **Progressive disclosure** — SKILL.md lean; dense examples go to `references/`.
 6. **Document boundaries & defaults** — capabilities, limits, forbidden assumptions explicit.
+7. **Measure the outcome, not the activity** — clearing a word-count warning by relocating content to `references/` is not compression. Verify total `SKILL.md + references/` word count actually decreased.
 
 Detail per principle: `references/core-principles.md`. Per-step Don't anti-patterns: `references/skill-creation-checklist.md`.
 

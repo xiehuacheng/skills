@@ -69,3 +69,15 @@ Include:
 - **Standard execution workflow** — e.g., authenticate → clarify intent → run command → summarize → propose next step → get approval → apply
 - **Pre-run checklist** — authentication, scope, target, expected output, whether approval is needed
 - **Conversational patterns** — propose options, pause at decision points, confirm exact actions, present results
+
+## 10. Measure the Outcome, Not the Activity
+
+Clearing a word-count warning by relocating content from `SKILL.md` to `references/` is **not compression**. The progressive-disclosure win (less loaded at trigger) is real, but total `SKILL.md + references/` volume is unchanged or worse if the moved content is duplicated, padded with cross-references, or kept verbose for "completeness."
+
+When trimming a skill, measure:
+
+- Total word count (`SKILL.md` + all `references/*.md`)
+- Per-file word counts (to spot bloated references)
+- Number of distinct facts across files (duplication indicator)
+
+A relocation that leaves total volume flat is cosmetic; only deletion + tightening reduces volume. If `references/` grows faster than `SKILL.md` shrinks, you have not compressed — you have just moved the weight.
