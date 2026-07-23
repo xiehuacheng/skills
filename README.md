@@ -93,15 +93,19 @@ npx skills add /path/to/skills@hot-skills
 
 [`cv-clone`](./skills/cv-clone) 用于复刻目标简历或 CV 样张的视觉版式，产出可编辑的 LaTeX 模板。
 
-给定一张样例简历（PDF/截图），按其版式生成一份可编译的 LaTeX 模板（`tectonic`/`xelatex` 链），自带 `\newcommand` 占位符，**默认不填内容**——先出模板预览，再问用户是否需要帮忙填真实信息。与 `cv-builder` 互补：`cv-builder` 负责内容，`cv-clone` 负责样式，二者可串联使用（先 cv-builder 出草稿，再 cv-clone 套用样张版式）。输出 macOS/Linux/Windows 三平台安装说明。
+给定一张样例简历（PDF/截图），按其版式生成一份可编译的 LaTeX 模板（`tectonic`/`xelatex` 链），自带 `\newcommand` 占位符，**默认不填内容**——先出模板预览，再问用户是否需要帮忙填真实信息。输出 macOS/Linux/Windows 三平台安装说明。Skill 独立运行，不依赖其他 skill。
 
 **v0.3.0** — 移除未实现的 Routes A/C 与 cv-builder 整合描述（与其他 skill 保持独立），SKILL.md 与 references/ 总词数从 3509 → 1765（−50%）。
+
+**v0.4.0** — 新增标准 Can do / Cannot do / Default 声明（内容边界、写操作 gate、默认 dry-preview）。
 
 ### creating-skills
 
 [`creating-skills`](./skills/creating-skills) 用于创建、改进和验证 Agent Skill。
 
 它通过协作式头脑风暴帮助用户澄清 skill 的场景、触发时机和范围，在每个关键节点停下来等用户确认，并在批准前主动挑战最脆弱的假设。除了生成 SKILL.md 和目录结构，它还强调：先确认安装位置、明确声明能力边界与默认行为、为使用 skill 的 agent 提供执行检查清单和对话模式、在 SKILL.md 中写明用户批准点与预期输出示例，以及通过 `quick_validate.py` 和 sub-agent 端到端测试来验证 skill 质量。
+
+**v1.7.0** — 新增原则 #10「Measure the outcome, not the activity」+ Step 5 三条 anti-pattern：Splitting to fake-shrink（拆文件假瘦）、Documenting unimplemented routes（描述未实现的功能）、Embedding integration with other skills（讲怎么跟其他 skill 配合）。教 skill 作者识别哪些是真压缩、哪些是内容搬家。
 
 ### effort-audit
 
