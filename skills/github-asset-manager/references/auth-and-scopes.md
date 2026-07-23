@@ -1,7 +1,5 @@
 # Authentication & Required Scopes
 
-Detail for the Authentication section in `SKILL.md`.
-
 ## Authentication Methods
 
 Acceptable in priority order:
@@ -26,17 +24,15 @@ If neither is available, stop and ask the user to authenticate. Public repositor
 
 ## Pre-Run Checklist
 
-Before any command:
-
-- [ ] I have run `gh auth status` and confirmed the active account
-- [ ] I have verified the token has the scopes required for this command
-- [ ] I have confirmed the target user or repository with the user
-- [ ] I have explained what the command will do and what output to expect
-- [ ] For write operations, I have obtained explicit approval
+- [ ] `gh auth status` confirms active account
+- [ ] Token has scopes required for this command
+- [ ] Target user or repo confirmed with user
+- [ ] What the command does + expected output explained
+- [ ] For writes: explicit approval obtained
 
 ## Prerequisites
 
 - **Node.js 18+** — verify with `node --version`. The skill uses only Node.js built-ins (`fs`, `path`, `child_process`, etc.); no `npm install` needed.
-- **Working directory** — run all `node scripts/github-asset-manager.js ...` commands from the skill root.
+- **Working directory** — run all commands from the skill root.
 
 If `node` is missing, ask the user to install Node.js first. Do not install global packages without permission.

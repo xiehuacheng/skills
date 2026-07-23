@@ -2,90 +2,68 @@
 
 Detailed syntax and workflow for each `github-asset-manager` command. SKILL.md only summarizes.
 
-All commands print to stdout by default. Use `--output <dir>` to save reports or generated files (e.g., to pass a beautified README into `i18n`, or to let the user review drafts before pushing). The script creates the output directory if missing.
+All commands print to stdout by default. Use `--output <dir>` to save reports or generated files. The script creates the output directory if missing.
 
 ---
 
-## `stars` — Analyze Starred Repositories
+## Read-Only Commands
 
 ```bash
-node scripts/github-asset-manager.js stars [--user <username>] [--refresh]
+node scripts/github-asset-manager.js stars  [--user <u>] [--refresh]   # Analyze starred repos
+node scripts/github-asset-manager.js repos  [--user <u>] [--refresh]   # Audit own repos
+node scripts/github-asset-manager.js audit  [--user <u>] [--refresh]   # Run both (recommended default)
 ```
 
-Use when the user wants to understand or clean up starred repositories. Output includes:
+**`stars` output:** total + archived + stale (no commits in 12 months) + description-less counts; top languages and topics; lists of stale / archived / description-less repos.
 
-- Total stars, archived count, stale count (no commits in 12 months), repos without descriptions
-- Top languages and topics among starred repos
-- Lists of archived, stale, and description-less repositories
+**`repos` output:** total + public/private split + forks + archived + stale counts; counts of repos missing description / topics / homepage / license; top languages; lists of metadata-missing or inactive >1y.
 
-Summarize findings; offer next steps such as un-starring stale repos or grouping favorites.
-
----
-
-## `repos` — Audit Personal Repositories
-
-```bash
-node scripts/github-asset-manager.js repos [--user <username>] [--refresh]
-```
-
-Output:
-
-- Total repos, public/private split, forks, archived, stale counts
-- Counts of repos missing description, topics, homepage, or license
-- Top languages across repositories
-- Lists of repos missing metadata or inactive >1 year
-
-Identify impactful improvements and ask whether to run `draft` for specific repos.
+After output: summarize findings, offer next steps (e.g., run `draft` for specific repos).
 
 ---
 
 ## `profile` — Generate Profile README
 
 ```bash
-node scripts/github-asset-manager.js profile [--user <username>] [--refresh] \
-  [--email <email>] [--featured-sort stars|recent] [--featured-style static|shields|compact|highlight] \
-  [--featured-limit <n>] [--featured-repos <repo1,repo2,...>] [--tech-stack <tech1,tech2,...>] [--theme <theme>]
+node scripts/github-asset-manager.js profile [--user <u>] [--refresh] \
+  [--email <email>] [--featured-sort stars|recent] \
+  [--featured-style static|shields|compact|highlight] [--featured-limit <n>] \
+  [--featured-repos <repo1,repo2,...>] [--tech-stack <t1,t2,...>] [--theme <theme>]
 ```
 
-Use when the user wants to improve their GitHub profile page. Output is a complete README for `username/username`.
+Verify the token has `read:user` scope (and `read:org` if reading organizations) before running.
 
-**Verify the token has `read:user` scope** (and `read:org` if reading organizations) before running.
-
-Default layout: Header + Contact · Tech Stack badges · GitHub Stats + Streak cards (dark mode `tokyonight`) · Featured Projects (optional; `--featured-limit 0` hides it).
-
-**Workflow — align sections with the user one by one:**
+**Workflow — align each section with the user one by one:**
 
 1. Fetch profile, repos, stars, activity.
 2. For each section, present proposed options and ask the user to confirm:
-   - **Tech Stack**: which tools/frameworks to highlight. Default list is a starting point; user must confirm.
-   - **Featured Projects**: whether to include, how many (`--featured-limit`), which specific repos, sort order. Do **not** auto-select top-N without approval. If using `highlight` style, recommend 1–2 projects; do not default to a long list.
-   - **Stats Cards**: theme and which cards to include.
+   - **Tech Stack**: tools/frameworks to highlight (default list is a starting point; user must confirm).
+   - **Featured Projects**: whether to include, how many, which specific repos, sort order. Do **not** auto-select top-N without approval. If `highlight` style, recommend 1–2 projects.
+   - **Stats Cards**: theme and which cards.
    - **Contact / Social Links**: confirm or add email, website, blog, LinkedIn.
-3. Generate the full README based on confirmed sections.
-4. Show the complete result and ask for final tweaks.
-5. **Only after explicit approval**, ask whether to push to `username/username`.
+3. Generate the full README based on confirmed sections, show the result, ask for tweaks. **Only after explicit approval**, ask whether to push.
 
-| Option | Description | Default |
-|---|---|---|
-| `--email` | Contact email | Read from GitHub profile |
-| `--featured-sort` | `stars` or `recent` | `stars` |
-| `--featured-style` | `static`, `shields`, `compact`, `highlight` | `static` |
-| `--featured-limit` | Number of featured projects; `0` hides | `6` |
-| `--featured-repos` | Override sort | Top sorted repos |
-| `--tech-stack` | Comma-separated tech list | Inferred; user must confirm |
-| `--theme` | Stats card theme | `tokyonight` |
+| Option | Default |
+|---|---|
+| `--email` | Read from GitHub profile |
+| `--featured-sort` | `stars` (`stars` / `recent`) |
+| `--featured-style` | `static` (`static` / `shields` / `compact` / `highlight`) |
+| `--featured-limit` | `6` (`0` hides section) |
+| `--featured-repos` | Top sorted (override) |
+| `--tech-stack` | Inferred; user must confirm |
+| `--theme` | `tokyonight` |
 
 ---
 
 ## `draft` — Repository Completion Draft
 
 ```bash
-node scripts/github-asset-manager.js draft --repo <owner/repo-name>
+node scripts/github-asset-manager.js draft --repo <owner/repo>
 ```
 
-Output: current metadata, recommended description, recommended topics, README analysis + improvement suggestions, recommended README structure.
+Output: current metadata, recommended description + topics, README analysis + improvement suggestions, recommended README structure.
 
-**Show recommendations and ask for explicit approval before applying anything.** Do not modify the repository automatically. To apply after approval:
+**Show recommendations and ask for explicit approval before applying anything.** Do not modify the repo automatically. To apply after approval:
 
 ```bash
 gh api --method PATCH repos/<owner>/<repo> \
@@ -96,140 +74,80 @@ Always double-check the `owner/repo` name and topic list with the user.
 
 ---
 
-## `beautify` — Beautify Repository README
+## `beautify` — Polish Repository README
 
 ```bash
-node scripts/github-asset-manager.js beautify --repo <owner/repo-name> [--from-file <path>]
+node scripts/github-asset-manager.js beautify --repo <owner/repo> [--from-file <path>]
 ```
 
-Fetches metadata + existing README and generates a beautified version with badges, preserving original sections. Output is saved as `README-beautified.md` (or stdout). **Show the draft and get explicit approval before replacing the live README.**
+Fetches metadata + existing README and generates a beautified version with badges, preserving original sections. Output saved as `README-beautified.md` (or stdout). **Show the draft and get explicit approval before replacing the live README.**
 
-To beautify a local file instead of fetching from GitHub, use `--from-file <path>`:
-
-```bash
-node scripts/github-asset-manager.js beautify --repo <owner/repo-name> --from-file ./README.md
-```
+To beautify a local file instead of fetching from GitHub, pass `--from-file <path>`.
 
 ---
 
 ## `i18n` — Multilingual README
 
 ```bash
-node scripts/github-asset-manager.js i18n --repo <owner/repo-name> --langs <primary>,<additional...>
+node scripts/github-asset-manager.js i18n --repo <owner/repo> --langs <primary>,<additional...>
 ```
 
-**Mandatory: do not run `i18n` until the user has confirmed both the primary language and the list of additional languages.** Do not assume a default (e.g., `en,zh,ja`) based on repository conventions or conversation language. Supported codes: `en`, `zh`, `ja`, `es`, `de`, `fr`.
+**Mandatory: do not run `i18n` until the user has confirmed both the primary language and the list of additional languages.** Do not assume a default (e.g., `en,zh,ja`). Supported codes: `en`, `zh`, `ja`, `es`, `de`, `fr`.
 
-Workflow:
+**Workflow:**
 
 1. Analyze existing README, detect source language, ask user to confirm.
-2. Ask user which language should be primary for `README.md`.
-3. Ask which additional languages. Wait for explicit answer.
-4. Explain that additional files will land in `docs/README.<lang>.md`.
-5. Only after the user confirms the full list, run the command.
-6. The command generates the file structure and translates **common section headings** that it recognizes. Body content remains in the source language at this point.
-7. **Delegate body translation to sub-agents** — one per target language.
+2. Ask which language should be primary for `README.md`, and which additional languages. Wait for explicit answers.
+3. Only after the user confirms the full list, run the command. It generates the file structure and translates **common section headings** it recognizes; body stays in source language. **Delegate body translation to sub-agents** — one per target language.
 
-Output:
-
-- `README.md` in the primary language
-- `docs/README.<lang>.md` per additional requested language
-- Each file includes a language switcher linking to other translations
-- A recommended description for the repository About section
+**Output:** `README.md` (primary) + `docs/README.<lang>.md` per additional language, each with a language switcher; recommended About description.
 
 The first code in `--langs` becomes the primary output language. If it does not match the detected source, the command warns.
 
-GitHub only supports one description in the About section. The primary language description is recommended; `i18n-summary.md` lists the same description under "Alternative Descriptions" for each target language — placeholder for sub-agents to polish. Discuss with the user whether to use the primary as-is or combine.
+GitHub only supports one description in About. Primary language is recommended; `i18n-summary.md` lists alternatives as placeholders for sub-agents to polish.
 
-**Important boundaries:**
+**Sub-Agent Translation Prompt** (replace `<lang>`):
 
-- No README in the repo → ask whether to create from scratch or abort
-- Detected source language not in the supported list → tell user, ask whether to proceed with a supported language as primary
-- `docs/README.<lang>.md` files already exist → warn they will be overwritten, proceed only after explicit approval
-- **Always show generated files and get explicit approval before pushing**
-
-To generate multilingual READMEs from a local file (e.g., beautify output):
-
-```bash
-node scripts/github-asset-manager.js beautify --repo <owner/repo> --from-file ./README.md --output ./drafts
-node scripts/github-asset-manager.js i18n --repo <owner/repo> --langs <primary>,<additional...> \
-  --from-file ./drafts/README-beautified.md --output ./drafts
-```
-
-### Sub-Agent Translation Prompt
-
-For each target language, dispatch a sub-agent with this prompt (replace `<lang>`):
-
-> Translate the body content of `docs/README.<lang>.md` into <lang>. Keep unchanged:
-> - The language switcher line at the top
-> - The repository title in the `# Title` heading
-> - All shields.io badge lines
-> - All Markdown links, inline code, file paths, and `owner/repo` references
-> - Actual CLI commands in fenced code blocks
-> - The section structure and heading levels
+> Translate the body of `docs/README.<lang>.md` into <lang>. Keep unchanged: language switcher line, `# Title`, shields.io badges, Markdown links, inline code, file paths, `owner/repo`, CLI commands in fenced blocks, section structure and heading levels.
 >
-> Translate all prose, list items, headings, table cells, image alt text, and **example user prompts** in ` ```text ` blocks into natural, fluent <lang>. For example prompts, preserve `owner/repo` but translate the surrounding text.
->
-> The one-line description in the `> ...` blockquote may be a machine-translated placeholder; polish it into natural, fluent <lang> while keeping the original meaning.
->
-> If you translate a heading that appears in the Table of Contents, update the corresponding TOC anchor link. E.g., `## 界面预览` → `## UI Preview` and `[界面预览](#界面预览)` → `[UI Preview](#ui-preview)`.
+> Translate all prose, list items, headings, table cells, image alt text, and **example user prompts** in ` ```text ` blocks into natural <lang>. Preserve `owner/repo` in example prompts. Polish the one-line `> ...` description if it is a machine-translated placeholder. Update TOC anchor links when you translate headings.
 >
 > Do not add or remove sections. Return the complete translated Markdown.
 
-Do not attempt body translation inline in a single pass — parallel sub-agents produce better results and are easier to review.
+Do not translate body inline — parallel sub-agents produce better results.
 
 ---
 
 ## `classify` — Star Lists Classification
 
 ```bash
-# Draft (read-only)
-node scripts/github-asset-manager.js classify [--user <username>] [--refresh]
-
-# Apply a confirmed plan
-node scripts/github-asset-manager.js classify --apply --plan ./plan.json
+node scripts/github-asset-manager.js classify [--user <u>] [--refresh]      # Draft (read-only)
+node scripts/github-asset-manager.js classify --apply --plan ./plan.json    # Apply a confirmed plan
 ```
 
-Workflow:
+**Workflow:**
 
 1. Run draft to fetch starred repos and existing lists.
-2. **Ask the user which strategy they prefer.** Present options, offer your recommendation, and say: *"After you choose, I will design the corresponding plan and show it to you. I will only execute it after you confirm."*
-   - **Reorganize from scratch**: design a completely new set of Lists and reassign all repositories.
-   - **Incremental cleanup**: keep existing Lists, fix misplaced or uncategorized repos, create new Lists only for categories genuinely missing.
+2. **Ask the user which strategy** they prefer:
+   - **Reorganize from scratch**: design a new set of Lists, reassign all repos.
+   - **Incremental cleanup**: keep existing Lists, fix misplaced/uncategorized repos, create new Lists only for missing categories.
    - Recommendation: if existing Lists are mostly reasonable, prefer "Incremental cleanup" as the safest option.
 3. **Design the classification yourself** based on repo names, descriptions, languages, topics. Do not rely on a fixed rule set.
-4. Present proposed lists and assignments as a table.
-5. Discuss adjustments: rename lists, move repos, merge or split categories.
-6. Once confirmed, **apply the plan directly**. Build it in memory and pipe via `--plan -`, or write a temp plan file and clean up. Do not require the user to manage a plan file.
+4. Present proposed lists + assignments as a table. Discuss adjustments: rename lists, move repos, merge or split categories.
+5. Once confirmed, **apply directly**. Build the plan in memory and pipe via `--plan -`, or write a temp file and clean up.
 
-Important:
+**Important:** before `--apply`, verify the token has `user` scope (`gh auth status`); if not, ask the user to run `gh auth refresh --scopes user`. Never run `--apply` without explicit user confirmation. The draft command is read-only and safe to run anytime.
 
-- Before `--apply`, verify the token has the `user` scope: `gh auth status`. If not, ask the user to run `gh auth refresh --scopes user`. Do not attempt `--apply` with insufficient scopes.
-- Never run `--apply` without explicit user confirmation.
-- The draft command is read-only and safe to run anytime.
-
-Classification plan JSON:
+**Classification plan JSON:**
 
 ```json
 {
   "listsToCreate": [{"name": "AI Agents", "description": "Agent frameworks and assistants"}],
   "listsToUpdate": [{"listId": "LIST_ID", "name": "RAG", "description": "RAG tools"}],
   "listsToDelete": ["LIST_ID"],
-  "repoAssignments": [
-    {"repoFullName": "owner/repo", "listIds": ["LIST_ID_1", "LIST_ID_2"]}
-  ]
+  "repoAssignments": [{"repoFullName": "owner/repo", "listIds": ["LIST_ID_1", "LIST_ID_2"]}]
 }
 ```
-
----
-
-## `audit` — Full Audit
-
-```bash
-node scripts/github-asset-manager.js audit [--user <username>] [--refresh]
-```
-
-Shortcut that runs both `stars` and `repos`. Use for an overall GitHub health check.
 
 ---
 
