@@ -1,17 +1,16 @@
 ---
 name: cv-clone
-description: Use when the user has a target resume or CV sample (PDF, screenshot, or visual reference) and wants to clone its visual layout and style into an editable LaTeX template. Triggers on phrases like "clone this resume layout", "match this CV design", "rebuild in this style", "reproduce this template", "make me a resume like this one". Pairs with the cv-builder skill — cv-builder fills the content, cv-clone supplies the style.
+description: Use when the user has a target resume or CV sample (PDF, screenshot, or visual reference) and wants to clone its visual layout and style into an editable LaTeX template. Triggers on phrases like "clone this resume layout", "match this CV design", "rebuild in this style", "reproduce this template", "make me a resume like this one".
 metadata:
-  version: "0.2.0"
+  version: "0.3.0"
   stage: draft
-  pairs_with: cv-builder
 ---
 
 # cv-clone — Resume Visual Cloning
 
 ## Overview
 
-Given a target resume sample (image/PDF) plus fresh content, produce a compilable **LaTeX template** matching the sample's visual style plus a rendered **PDF preview**. v0.2.0 ships **template cloning only** — content filling is gated behind user confirmation, or delegated to the paired `cv-builder` skill.
+Given a target resume sample (image/PDF) plus fresh content, produce a compilable **LaTeX template** matching the sample's visual style plus a rendered **PDF preview**. Ships **template cloning only** — content filling is gated behind user confirmation.
 
 > Style is cloned, not content. Never copy names, phones, or company claims from the source sample.
 
@@ -21,18 +20,18 @@ Use when:
 
 - User has a target resume sample (image/PDF) and wants its **visual style** cloned for their own CV
 - User wants a compilable, editable LaTeX template (not just a static PDF)
-- User can install `tectonic`, or accept Route A (HTML+CSS) instead
+- User can install `tectonic`
 
 Do NOT use when:
 
 - User has no sample — use `cv-builder` (built-in templates)
 - User only wants content, no specific external visual style
-- Target is Word / PowerPoint / Canva — see `references/alternative-routes.md`
+- Target is Word / PowerPoint / Canva — not supported
 
 ## Defaults
 
 - **Read-only mode.** First deliverable is template + dry-render preview; no user data touched.
-- **Photo mirrors the sample.** Has a slot → template defines `\cvphoto{path}`. None → no macro.
+- **Photo mirrors the sample.** Has a slot → template defines `\cvphoto{path}`. None → no macro. No silent injection.
 - **Step 5 gate.** After preview, ask: *"Shall I fill this template with your content?"* Affirmative unlocks Step 6. Silence = dry template.
 - **Sample by path.** Sources referenced by path, never copied.
 
@@ -81,7 +80,7 @@ Open `template_preview-1.png` for the user. Ask:
 
 > Template generated. Preview at `<path>`. Shall I fill this template with your content?
 
-Branches: **No** → done. **Yes, fill these fields: …** → Step 6. **Yes, integrate with cv-builder** → `references/cv-builder-integration.md`.
+Branches: **No** → done. **Yes, fill these fields: …** → Step 6.
 
 ### Step 6 — Fill (only after explicit "Yes")
 
@@ -89,7 +88,7 @@ For each `\newcommand` the user wants filled: confirm the exact value (echo back
 
 ## Common mistakes
 
-Full list in `references/common-mistakes.md`. The five that bite most:
+The five that bite most:
 
 1. **Missing `AutoFakeBold=2`** on macOS — `\textbf` looks identical to regular weight on `PingFang SC`. Always include it.
 2. **`pdflatex` instead of `xelatex`** — CJK renders as boxes. Always `tectonic`.
@@ -97,12 +96,12 @@ Full list in `references/common-mistakes.md`. The five that bite most:
 4. **Filling real data before preview approval** — violates Step 5 gate. Dry preview first, always.
 5. **Forgetting `\usepackage{xcolor}`** before `\definecolor` — build fails. Diff against the skeleton.
 
+Extended catalogue (#6, #7, #9, #10): `references/common-mistakes.md`.
+
 ## References
 
 - `references/latex-template-skeleton.tex` — canonical skeleton the agent extends
 - `references/install.md` — `tectonic` + `pdftoppm` install per platform
 - `references/style-extraction-prompt.md` — vision-model prompt + YAML→LaTeX mapping
-- `references/alternative-routes.md` — Routes A (HTML+CSS) and C (Markdown+HTML)
-- `references/cv-builder-integration.md` — pairing cv-clone with cv-builder
-- `references/common-mistakes.md` — full failure-mode catalogue (10 entries)
+- `references/common-mistakes.md` — extended failure-mode catalogue
 - `references/limits.md` — what is approximate vs guaranteed

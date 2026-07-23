@@ -82,9 +82,9 @@ It collects materials from local projects, GitHub repositories, existing resume 
 
 [`cv-clone`](../skills/cv-clone/) clones the visual layout of a target resume or CV sample and emits an editable LaTeX template.
 
-Given a sample resume (PDF or screenshot), it produces a compilable LaTeX template (built on `tectonic` / `xelatex`) with `\newcommand` placeholders. By default it does NOT pre-fill real content — it generates the template, asks the user to confirm, and only then unlocks the fill workflow. Pairs with `cv-builder`: cv-builder supplies the content, cv-clone supplies the style, so the two can be chained (run cv-builder for content, then cv-clone to apply a target's visual style). macOS is the primary target; the `SKILL.md` documents `apt`/`scoop` paths for Linux and Windows. HTML+CSS and Markdown+HTML implementations ship as references/ alternatives.
+Given a sample resume (PDF or screenshot), it produces a compilable LaTeX template (built on `tectonic` / `xelatex`) with `\newcommand` placeholders. By default it does NOT pre-fill real content — it generates the template, asks the user to confirm, and only then unlocks the fill workflow. Pairs with `cv-builder`: cv-builder supplies the content, cv-clone supplies the style, so the two can be chained (run cv-builder for content, then cv-clone to apply a target's visual style). macOS is the primary target; the `SKILL.md` documents `apt`/`scoop` paths for Linux and Windows.
 
-**v0.2.0** — `SKILL.md` trimmed to 794 words (51% smaller). New references: `install.md`, `limits.md`, `style-extraction-prompt.md`.
+**v0.3.0** — removed unimplemented Routes A/C and cv-builder integration content (skills stay independent). Total `SKILL.md` + `references/` shrank from 3509 → 1765 words (−50%).
 It collects materials from local projects, GitHub repositories, existing resume files, or plain-text notes; uses sub agents to read and extract project highlights in parallel; guides the user through confirming personal info, career goals, experience, and skills; and finally generates a Markdown draft that can be rendered into HTML/PDF. Supports built-in templates such as modern, classic, and minimal, as well as custom templates or agent-generated styles based on user descriptions.
 
 ### effort-audit

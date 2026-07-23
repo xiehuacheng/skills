@@ -93,9 +93,9 @@ npx skills add /path/to/skills@hot-skills
 
 [`cv-clone`](./skills/cv-clone) 用于复刻目标简历或 CV 样张的视觉版式，产出可编辑的 LaTeX 模板。
 
-给定一张样例简历（PDF/截图），按其版式生成一份可编译的 LaTeX 模板（`tectonic`/`xelatex` 链），自带 `\newcommand` 占位符，**默认不填内容**——先出模板预览，再问用户是否需要帮忙填真实信息。与 `cv-builder` 互补：`cv-builder` 负责内容，`cv-clone` 负责样式，二者可串联使用（先 cv-builder 出草稿，再 cv-clone 套用样张版式）。输出 macOS/Linux/Windows 三平台安装说明；HTML+CSS 与 Markdown+HTML 作为 references/ 备选。
+给定一张样例简历（PDF/截图），按其版式生成一份可编译的 LaTeX 模板（`tectonic`/`xelatex` 链），自带 `\newcommand` 占位符，**默认不填内容**——先出模板预览，再问用户是否需要帮忙填真实信息。与 `cv-builder` 互补：`cv-builder` 负责内容，`cv-clone` 负责样式，二者可串联使用（先 cv-builder 出草稿，再 cv-clone 套用样张版式）。输出 macOS/Linux/Windows 三平台安装说明。
 
-**v0.2.0** — SKILL.md 精简到 794 词（51% ↓），新增 `references/install.md`、`references/limits.md`、`references/style-extraction-prompt.md`。
+**v0.3.0** — 移除未实现的 Routes A/C 与 cv-builder 整合描述（与其他 skill 保持独立），SKILL.md 与 references/ 总词数从 3509 → 1765（−50%）。
 
 ### creating-skills
 
