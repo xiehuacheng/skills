@@ -1,6 +1,9 @@
 ---
 name: cv-builder
 description: "Use when the user wants to build a tech resume or CV. Generate a programmer/technical resume or CV from local projects, GitHub repositories, old resume files, or plain text. Trigger phrases: help me write a resume, generate a resume from these projects, organize GitHub projects into a resume, polish my resume, generate a technical resume PDF."
+metadata:
+  author: xiehuacheng
+  version: "1.0.0"
 ---
 
 # CV Builder
@@ -28,6 +31,14 @@ Do not use for:
 - Verifying the truthfulness of work history or project claims
 - Guaranteeing ATS compatibility or interview responses
 - Non-technical resumes unless the user explicitly provides all content
+
+## Boundaries and Defaults
+
+**Can do:** read local projects, GitHub repos, old resume files, or plain-text notes; dispatch sub-agents to read materials in parallel; ask targeted follow-up questions; draft a Markdown resume; render to HTML/PDF via built-in (modern/classic/minimal) or custom templates.
+
+**Cannot do (without explicit user approval):** fabricate experience, projects, or metrics not in the source materials; submit resumes to job boards or company portals; modify any source files outside the skill's output directory.
+
+**Default behavior:** read-only on source materials; all writes go to the user's chosen output directory and require approval; the user confirms every personal claim (employment dates, project metrics, technologies used) before it enters the draft.
 
 ## Core Workflow
 

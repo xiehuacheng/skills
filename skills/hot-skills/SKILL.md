@@ -3,7 +3,7 @@ name: hot-skills
 description: Discover hot and trending Agent Skills across multiple leaderboards (agentskills.media, skills-rank.com, skills.sh). Summarize, categorize, and search. Use when the user asks about popular skills, hot skills, trending skills, or wants to find skills by category.
 metadata:
   author: xiehuacheng
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # Hot Skills
@@ -13,6 +13,14 @@ This skill helps you discover trending and hot Agent Skills by aggregating data 
 - **agentskills.media** — GitHub stars and categories
 - **skills-rank.com** — Individual skill ranking scores
 - **skills.sh** — Real install counts (fetched via headless browser from the public leaderboard)
+
+## Boundaries and Defaults
+
+**Can do:** aggregate and de-duplicate data from three public leaderboards; summarize top skills overall or by category; search by keyword; output JSON or human-readable text; force-refresh local cache; filter by category or alias.
+
+**Cannot do (without explicit user approval):** install or modify any Agent Skill on the user's system; write to files outside the user's chosen `--output` directory; assume default categories or aliases without confirmation.
+
+**Default behavior:** read-only — never writes unless `--output <dir>` is explicitly passed; uses cached data when fresh (`<1h` old) to avoid rate-limit issues; shows the data source and freshness on each command.
 
 ## When to Use
 

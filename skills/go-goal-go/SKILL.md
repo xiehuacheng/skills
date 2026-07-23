@@ -3,7 +3,7 @@ name: go-goal-go
 description: Help users craft well-specified /goal objectives with clear end states, proof, boundaries, and stop rules. Trigger when the user asks for goal writing, wants to turn a multi-turn task into an autonomous run, or describes work that could benefit from goal mode. Proactively suggests goal mode when appropriate, lets users explicitly name skills/system tools to use inside the loop, and pushes back honestly when a task is ill-suited for goal execution.
 metadata:
   author: xiehuacheng
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # go-goal-go
@@ -49,15 +49,6 @@ Do not trigger this skill for:
 - Tasks with no observable proof of completion ("make the codebase better").
 - Pure exploration or research where the path is unknown and human judgment is needed at every step.
 - Tasks that require irreversible destructive actions without real-time approval.
-
-## Relationship to built-in write-goal
-
-The built-in `write-goal` skill is a general-purpose coach for goal wording. `go-goal-go` adds two responsibilities:
-
-1. **Proactive fit assessment** — decide whether to suggest goal mode at all.
-2. **Explicit skill/tool declaration** — let users name the skills and system capabilities the autonomous loop should rely on.
-
-If both skills are available, prefer `go-goal-go` when the user might need a fit judgment or wants to declare loop skills; fall back to `write-goal` for pure wording refinement.
 
 ## Goal-fit check
 

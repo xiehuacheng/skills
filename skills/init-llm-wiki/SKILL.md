@@ -3,7 +3,7 @@ name: init-llm-wiki
 description: Initialize and maintain an Obsidian-first, Google Cloud OKF 0.1–compatible Karpathy-style LLM Wiki for a given domain. Use when the user wants to build or maintain a Karpathy-style LLM wiki for a new domain.
 metadata:
   author: xiehuacheng
-  version: "1.2.0"
+  version: "1.3.0"
 ---
 
 # Building an LLM Wiki
@@ -23,6 +23,14 @@ Do NOT use when: a static docs site or README (use a docs generator); a personal
 ```
 
 The agent will ask which domain you want to build the wiki for, then complete initialization.
+
+## Boundaries and Defaults
+
+**Can do:** scaffold a new wiki (root `index.md`, `log.md`, `00-Raw/`, `01-Wiki/`, `02-Areas/` or `02-Module/`, agent schema doc, `WORKFLOWS.md`); standardize an existing wiki to OKF + Obsidian conventions; run Ingest (read raw materials, discuss takeaways, dispatch sub-agents to write cards); Lint (check structure, links, frontmatter).
+
+**Cannot do (without explicit user approval):** modify any file inside `00-Raw/` (read-only by design); pre-fill knowledge cards without sources; create `02-Areas/<domain>/` subfolders at init (waits for Ingest + confirmation); batch-convert `[[wikilink]]` to standard Markdown (only on explicit external OKF export).
+
+**Default behavior:** read-only mode until the user explicitly approves a write; `00-Raw/` is treated as immutable; subdirectories under `02-*/` are not created at init; Obsidian `[[wikilink]]` is preserved (never converted to Markdown links during editing).
 
 ## Generated Directory Structure
 

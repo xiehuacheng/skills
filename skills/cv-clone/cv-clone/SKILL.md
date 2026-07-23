@@ -2,7 +2,7 @@
 name: cv-clone
 description: Use when the user has a target resume or CV sample (PDF, screenshot, or visual reference) and wants to clone its visual layout and style into an editable LaTeX template. Triggers on phrases like "clone this resume layout", "match this CV design", "rebuild in this style", "reproduce this template", "make me a resume like this one".
 metadata:
-  version: "0.3.0"
+  version: "0.4.0"
   stage: draft
 ---
 
@@ -24,7 +24,7 @@ Use when:
 
 Do NOT use when:
 
-- User has no sample — use `cv-builder` (built-in templates)
+- User has no sample — no LaTeX template can be cloned without one
 - User only wants content, no specific external visual style
 - Target is Word / PowerPoint / Canva — not supported
 
@@ -34,6 +34,12 @@ Do NOT use when:
 - **Photo mirrors the sample.** Has a slot → template defines `\cvphoto{path}`. None → no macro. No silent injection.
 - **Step 5 gate.** After preview, ask: *"Shall I fill this template with your content?"* Affirmative unlocks Step 6. Silence = dry template.
 - **Sample by path.** Sources referenced by path, never copied.
+
+**Can do:** extract a target resume's layout, typography, spacing, and color palette from a PNG/PDF; generate a compilable LaTeX template with `\newcommand` placeholders; compile the template with `tectonic` to produce a PDF preview; accept user content for each placeholder after showing the dry preview.
+
+**Cannot do (without explicit user approval):** fill user-provided personal data into the template before Step 5 approval; overwrite an existing `template.tex` without confirmation; copy names, phones, or company claims from the source sample (style only).
+
+**Default behavior:** all commands are read-only; fidelity bar defaults to "same vibe" (not pixel-perfect); the Step 5 dry-preview gate is mandatory before any content is filled.
 
 ## Required environment
 
