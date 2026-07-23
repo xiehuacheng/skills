@@ -1,76 +1,50 @@
 # Kimi Code Skill Standards
 
-Reference guide for the structural and writing standards that every generated skill should follow.
+Structural and writing standards that every generated skill should follow.
 
-## SKILL.md Frontmatter
+## Frontmatter
 
-Required fields:
-
-- `name`: hyphen-case, lowercase letters/digits/hyphens only, max 64 chars, matches directory name
-- `description`: what the skill is for + when to use it + concrete trigger phrases
-
-Optional fields:
-
-- `metadata`: product-specific metadata if needed
-
-Avoid embedding workflow summaries in `description`. The description should help Kimi decide whether to load the skill, not serve as a shortcut for the body content.
+- **`name`** — hyphen-case, lowercase letters/digits/hyphens, max 64 chars, matches directory name
+- **`description`** — what the skill is for + when to use + concrete trigger phrases. Avoid embedding workflow summaries; the description helps Kimi decide whether to load the skill, not serve as a shortcut for the body
+- **`metadata`** (optional) — product-specific metadata if needed
 
 ## SKILL.md Body
 
-- Use imperative/infinitive form: "Parse the file", "Validate input"
-- Avoid second person: "You should..."
-- Keep it focused; move heavy reference material to `references/`
-- Use code examples for technical skills
-- Include a "When NOT to use" section if boundaries matter
-- Write the authoritative `SKILL.md` in English by default. Generate translated copies as `SKILL.<lang>.md` only when needed.
+- Imperative form: "Parse the file", "Validate input". Avoid second person.
+- Keep focused; move heavy reference to `references/`.
+- Use code examples for technical skills.
+- Include "When NOT to use" if boundaries matter.
+- Authoritative `SKILL.md` in English by default. Generate `SKILL.<lang>.md` copies only when needed.
 
-## Declaring Boundaries and Defaults
+## Boundaries & Defaults (declare near top of SKILL.md)
 
-Every skill must declare its boundaries near the top of `SKILL.md`:
+- **Can do** — concrete capabilities.
+- **Cannot do (without explicit approval)** — operations the skill must never auto-perform.
+- **Default behavior** — read-only by default, what needs confirmation, forbidden assumptions.
 
-- **Can do** — concrete capabilities the skill provides.
-- **Cannot do (without explicit approval)** — operations the skill must never perform automatically.
-- **Default behavior** — whether commands are read-only by default, what requires user confirmation, and what assumptions are forbidden.
-
-Example for a GitHub-facing skill:
-
-> **Can do:** read public and private GitHub data, generate reports, draft READMEs and metadata recommendations.  
-> **Cannot do:** push commits, update repository metadata, or delete Star Lists without explicit user approval.  
-> **Default behavior:** all commands are read-only. Any write operation requires the user to confirm the exact change.
-
-Also document:
-
-- Required tools, versions, and authentication scopes
-- Default values and when they may be overridden
-- Operations that require explicit user approval
-- Assumptions the agent must not make (e.g., "do not auto-select languages")
+Also document: required tools/versions/auth scopes; default values and override rules; approval points; forbidden assumptions.
 
 ## Directory & Resource Rules
 
-- Only create resource directories that are actually used
-- Do not create README.md, CHANGELOG.md, or other auxiliary documentation
-- `scripts/` — executable helpers, tested, executable bit set
-- `references/` — docs loaded on demand, referenced from SKILL.md
-- `assets/` — templates, images, boilerplate used in output
+- Only create resource directories actually used.
+- Do not create README.md, CHANGELOG.md, or other auxiliary docs.
+- `scripts/` — executable helpers, tested, executable bit set.
+- `references/` — on-demand docs referenced from SKILL.md.
+- `assets/` — templates, images, boilerplate used in output.
 
 ## Cross-Referencing Other Skills
 
-- Reference by skill name: `Use superpowers:test-driven-development`
-- Do not use `@` links to force-load files
-- Mark clearly when a sub-skill is required
+- Reference by skill name: `Use superpowers:test-driven-development`.
+- Do not use `@` links (force-loads files).
+- Mark clearly when a sub-skill is required.
 
 ## Naming Rules
 
-- Lowercase letters, digits, hyphens only
-- No leading/trailing hyphens, no consecutive hyphens
-- Folder name matches skill `name`
-- Prefer active, verb-led names for process skills
-- Prefer noun/domain names for reference skills
+- Lowercase letters, digits, hyphens only.
+- No leading/trailing hyphens, no consecutive hyphens.
+- Folder name matches skill `name`.
+- Prefer verb-led names for process skills; noun/domain for reference skills.
 
 ## What NOT to Create
 
-Do not create skills for:
-
-- One-off solutions
-- Project-specific conventions (use CLAUDE.md / AGENTS.md instead)
-- Things enforceable by simple validation (automate those instead)
+Do not create skills for: one-off solutions; project-specific conventions (use `CLAUDE.md` / `AGENTS.md` instead); things enforceable by simple validation (automate those instead).
