@@ -1,102 +1,60 @@
-# Reviewer Sub-agent Template
+# Reviewer Template
 
-User-facing prompt-body template for the `<reviewer>` block. At **standard** tier only the 4 sections below are required; the host fills in safe defaults for everything else. At **high** tier the user replaces those defaults with an explicit `<dispatch-primitive>` block — see `references/dispatch-primitive.md`.
+> **User-facing.** This is the template the user copies into their goal plan. The `<reviewer>` block is the only structured artifact in an otherwise natural-language goal plan; the rest is up to the host runtime.
 
-## Sections
+## What the user writes
 
-### Role
-
-Pick one:
-
-- **verifier** — checks each acceptance criterion against the captured state and reports pass/fail.
-- **critic** — actively looks for flaws, missed edges, and places where the proof is technically true but the intent is unmet.
-- **adversarial_reviewer** — assumes the implementation is wrong and tries to break it. Use only when the goal touches security, auth, payments, or data mutation. Forces read-only + no-network + no-git-push sandbox.
-
-Default: verifier.
-
-### Inputs
-
-List the names of inputs the host auto-collects. Typical options:
-
-- `final_diff` — `git diff <base>..HEAD`
-- `proof_output` — last proof invocation stdout + stderr (or last N for flake policy)
-- `iterations_log` — `goal-logs/<run-id>/iterations.jsonl`
-- `goal_plan` — the full approved plan text
-
-### Acceptance Criteria
-
-**Each criterion must reference an Inputs entry it reads from and a specific check method.** Vague wording ("clean", "good", "works", "looks correct") is rejected.
-
-Example of a good criterion:
-
-```
-1. (a) input: final_diff; (b) check: enumerate changed file paths;
-   (c) pass: every path is under src/auth/ or test/auth/;
-   (d) on fail reason: 'out-of-scope: <path>'.
-```
-
-### Verdict schema
-
-The Reviewer's **last line** of output must be exactly one of:
-
-- `PASS`
-- `FAIL: <one-line reason>` (max 280 chars)
-
-Anything else is `REVIEW_INFRA_ERROR: verdict_unparseable` per the dispatch-primitive's parser.
-
-## Skeleton (paste into goal plan at standard tier)
+A `<reviewer>` block with four short sections in plain language:
 
 ```
 <reviewer>
-Role: <verifier | critic | adversarial_reviewer>
+Role: verifier
 
 Inputs:
-- final_diff
-- proof_output
-- iterations_log
+- final diff vs base
+- last proof invocation's output
+- iterations log (if available)
 
-Acceptance Criteria:
-1. (a) input: <name>; (b) check: <method>; (c) pass: <condition>; (d) on fail reason: <one line>.
-2. (a) input: <name>; (b) check: <method>; (c) pass: <condition>; (d) on fail reason: <one line>.
+Acceptance:
+- End state's predicate holds (state the predicate).
+- No file outside Boundaries was modified.
+- (Optional stricter checks: no skipped tests, no assertion weakening, etc.)
 
-Verdict: last line of output must be exactly `PASS` or `FAIL: <one-line reason>`.
+Verdict: last line of your output must be exactly `PASS` or `FAIL: <one-line reason>`.
 </reviewer>
 ```
 
-## Host-applied defaults at standard tier
+## Field guidance
 
-The skill (or runtime) fills these in automatically when the goal plan only contains the 4-section block:
+- **Role**: pick one.
+  - `verifier` (default) — checks each Acceptance line against the captured state.
+  - `critic` — actively looks for flaws, missed edges, "passes but intent unmet".
+  - `adversarial_reviewer` — assumes the implementation is wrong and tries to break it. Use only for security / auth / payments / data mutation goals.
+- **Inputs**: list the input names the host should hand to the sub-agent. Host knows how to fetch each of: `final diff`, last `proof output`, `iterations log`, full `goal plan`. Names are plain words; no transport / size / secret-scan declarations needed.
+- **Acceptance**: short, concrete, checkable lines. Each must be something the sub-agent can read from the Inputs and decide pass/fail. Reject vague wording ("looks clean", "good").
+- **Verdict schema**: leave the line above verbatim. The host parses it deterministically; do not invent other formats.
 
-- role: `verifier` if unspecified
-- sandbox: read-only + deny-network + deny-git-push + secret_scrub required
-- budget: `max_tokens=4000`, `max_wall_clock_seconds=180`, `max_tool_calls=30`, `max_retries_on_malformed=1`, `max_retries_on_dispatch_error=0`
-- verdict_parser: `deterministic-trim-blank-regex`
-- on_fail: `route_back_to_loop_with_iteration_decrement`
-- artifacts: `goal-logs/<run-id>/reviewer.txt` and `verdict.txt`; retention 90 days
-- idempotency_key: `sha256(run_id + iteration + role)` (host-generated)
+## How the host interprets the rest
 
-## At high tier — replace defaults with `<dispatch-primitive>` block
+Anything beyond the four sections above (sandbox, sub-agent dispatch budget, secret scrubbing, idempotency, capability boundary) is the host's responsibility. The user does not write those.
 
-Replace the host defaults by writing a `<dispatch-primitive>` block in the goal plan with explicit `budget`, `sandbox`, `verdict_parser`, `idempotency_key`, `inputs` (with `transport`, `max_bytes`, `secret_scan`), and `on_fail`. See `references/dispatch-primitive.md`.
+Host-applied safe defaults when the user does not override:
 
-If the goal plan contains both a `<reviewer>` block AND a `<dispatch-primitive>` block, the `<dispatch-primitive>` values take precedence over the host defaults.
+- sandbox: read-only + deny network + deny git push + secret scrubbing on,
+- sub-agent budget: 4000 tokens / 180 s wall-clock / 30 tool calls / 1 retry on malformed verdict,
+- verdict parser: case-sensitive regex `^(PASS|FAIL:.{1,280})$` after trimming trailing blank lines,
+- on-fail: route back to the main loop iteration, decrement remaining budget,
+- artifacts: full sub-agent output persisted at `goal-logs/<run-id>/reviewer.txt`, last line saved as `verdict.txt`, 90-day retention,
+- idempotency: derived from `(run_id, iteration, role)`; duplicate dispatches deduped.
 
-## Verdict parsing (standard across all tiers)
+If the user's Acceptance section demands stricter sandboxing (e.g. "must reach no network", "must read secret-store"), the host applies the strictest sandbox that satisfies the criteria.
 
-`deterministic-trim-blank-regex`:
+## When you want to skip the Reviewer
 
-1. Trim trailing whitespace.
-2. Split on `\n`; drop trailing blank lines.
-3. Take the last non-blank line.
-4. Match case-sensitive regex `^(PASS|FAIL:.{1,280})$`.
-5. Anything else → `REVIEW_INFRA_ERROR: verdict_unparseable`. Last 5 lines retained for diagnosis.
-
-## Opt-out (any tier)
-
-If the user explicitly declines the Reviewer at draft time, the goal plan must contain this literal comment on its own line:
+Insert one literal line anywhere in the goal plan:
 
 ```
 <!-- no Reviewer gate: completion by agent self-judgment -->
 ```
 
-The skill surfaces the warning at draft, start, and resume; the host does not enforce any acceptance gate. The user owns completion.
+The skill surfaces a warning at draft, start, and resume. The host does not enforce any acceptance gate. The user owns completion.
