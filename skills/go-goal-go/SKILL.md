@@ -3,7 +3,7 @@ name: go-goal-go
 description: Help users write /goal objectives as concise natural-language prose in their own language, with a built-in Reviewer sub-agent check. Triggers on user requests in any language asking to write a goal.
 metadata:
   author: xiehuacheng
-  version: "2.3.0"
+  version: "2.3.1"
 ---
 
 # go-goal-go
@@ -13,7 +13,8 @@ A `/goal` plan is **prose in the user's language**, plus one `<reviewer>` block 
 ## Rules
 
 - Drafting is read-only until `CreateGoal` is called. All shipping actions need explicit approval.
-- Default Reviewer role: `verifier`. Default budget: 50 iterations / 30 min wall-clock / $2 / 5-no-progress / 20% reserve for handoff.
+- The Reviewer is a separate sub-agent (not the main loop). On `FAIL` route back to the main loop iteration, decrement remaining budget; do not declare complete. On Reviewer dispatch error (timeout / OOM / refused / empty) surface to the user as a soft pause with the captured partial output, never as a code change.
+- Default Reviewer role: `verifier`. Default budget: 50 iterations / 30 min wall-clock / $2 / 5-no-progress / 20% reserve for handoff. Budget exhausted terminates with a cost summary; never claim `PASS`.
 - Default boundaries: project-only paths, write allowed in-scope, deny-all network.
 - A `<reviewer>` block must be preceded by a one-line **dispatch mandate** naming the sub-agent and forbidding in-place self-judging. See `references/reviewer-template.md` for canonical phrasings.
 - Verdict parsing: `^(PASS|FAIL:.{1,280})$` on the last non-blank line. Anything else = `REVIEW_INFRA_ERROR`.
