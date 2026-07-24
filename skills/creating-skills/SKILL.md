@@ -3,7 +3,7 @@ name: creating-skills
 description: Use when the user wants to create a new skill, write a SKILL.md, scaffold skill structure, improve an existing skill, or discuss skill design. Triggers on phrases like "create a skill", "new skill", "write a skill", "skill design", "validate skill", or when the user describes a reusable workflow, technique, or domain guide they want Kimi Code to learn.
 metadata:
   author: xiehuacheng
-  version: "1.7.0"
+  version: "1.8.0"
 ---
 
 # Creating Skills
@@ -84,7 +84,7 @@ Once approved: (1) `scripts/init_skill.py <name> --path <approved-dir> [--resour
 
 ### Step 7 — Validate & Iterate
 
-Run `scripts/quick_validate.py <skill-dir>`. Fix reported issues. Then **forward-test** — protocol in `references/waiting-and-forward-test.md`. If the forward-test fails, **fix the SKILL.md** (do not patch the test). Bump `metadata.version` whenever behavior changes.
+Run `scripts/quick_validate.py <skill-dir>`. Fix reported issues. The validator enforces structural rules including **frontmatter script purity**: the `description` field must be Latin-script (no CJK characters). Mixing user-language phrases into the description confuses routing agents and is not corrected by prose rules alone — use language-neutral wording in the description and put quoted user-language examples in the body. Then **forward-test** — protocol in `references/waiting-and-forward-test.md`. If the forward-test fails, **fix the SKILL.md** (do not patch the test). Bump `metadata.version` whenever behavior changes.
 
 ## References
 

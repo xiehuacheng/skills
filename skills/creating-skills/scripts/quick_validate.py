@@ -18,6 +18,22 @@ MAX_DESCRIPTION_LENGTH = 1024
 DESCRIPTION_WARNING_LENGTH = 500
 BODY_WORD_WARNING = 1200
 
+# CJK Unified Ideographs + Hiragana + Katakana + Hangul + CJK Symbols.
+# Used to flag accidental user-language mixing in frontmatter `description`,
+# where the description is the agent-routing parse target. The skill body
+# stays free-form because legitimate skills (i-translation, multilingual)
+# document non-Latin text intentionally.
+CJK_PATTERN = re.compile(
+    r"["
+    r"\u3000-\u303f"          # CJK Symbols and Punctuation
+    r"\u3040-\u309f"          # Hiragana
+    r"\u30a0-\u30ff"          # Katakana
+    r"\u4e00-\u9fff"          # CJK Unified Ideographs (common)
+    r"\uac00-\ud7af"          # Hangul Syllables
+    r"\u3400-\u4dbf"          # CJK Unified Ideographs Extension A
+    r"]"
+)
+
 
 def parse_frontmatter_text(content):
     """Extract the raw frontmatter text from SKILL.md."""
@@ -201,6 +217,12 @@ def validate_skill(skill_path):
             elif len(description) > DESCRIPTION_WARNING_LENGTH:
                 warnings.append(
                     f"Description is {len(description)} characters. Consider keeping it under {DESCRIPTION_WARNING_LENGTH}."
+                )
+
+            cjk_in_description = CJK_PATTERN.search(description)
+            if cjk_in_description:
+                warnings.append(
+                    f"Description contains non-Latin script (CJK character {cjk_in_description.group(0)!r} at offset {cjk_in_description.start()}). creating-skills default is English; replace user-language phrases with language-neutral wording in the description and put any quoted examples in the body."
                 )
 
             # Check for workflow-summary patterns that may cause agents to skip the body
