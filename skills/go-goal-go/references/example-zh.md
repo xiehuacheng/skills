@@ -19,7 +19,8 @@ Same scenario as the SKILL.md example, written in Chinese (the user's language).
 - 需要改 jest/vitest config、tsconfig、CI workflow → 停，问用户。
 - 用户主动中断 → 优雅停机，保留 checkpoint。
 
-谁来检查：
+谁来检查（派一个独立 sub-agent 按下面这段 prompt 审查；主 loop 必须派发，不得就地自判）：
+
 <reviewer>
 Role: critic
 

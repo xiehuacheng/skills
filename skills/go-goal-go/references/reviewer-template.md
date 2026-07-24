@@ -2,6 +2,17 @@
 
 > **User-facing.** This is the template the user copies into their goal plan. The `<reviewer>` block is the only structured artifact in an otherwise natural-language goal plan; the rest is up to the host runtime.
 
+## Dispatch mandate (mandatory one-liner above the block)
+
+The `<reviewer>` block must be preceded by a one-line dispatch mandate in the goal plan prose. The mandate tells both the host and any future reader that the block is meant for an **independent sub-agent** dispatched by the main loop, never for in-place self-judging.
+
+Canonical phrasings (accept equivalent wording in the user's language; both intents — dispatch-as-sub-agent AND forbid-in-place — must be present):
+
+- English: `Dispatch an independent sub-agent with the prompt below; the main loop must not self-judge this in place.`
+- Chinese: `派一个独立 sub-agent 按下面这段 prompt 审查；主 loop 必须派发，不得就地自判。`
+
+Place this directly above the `<reviewer>` block. A goal plan that omits or weakens this mandate is non-conformant; the skill refuses to ship it.
+
 ## What the user writes
 
 A `<reviewer>` block with four short sections in plain language:

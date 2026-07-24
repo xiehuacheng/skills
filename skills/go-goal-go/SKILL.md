@@ -3,7 +3,7 @@ name: go-goal-go
 description: "Help users write /goal objectives as concise natural-language prose in their own language, with a built-in Reviewer sub-agent check. Triggers on user requests in any language asking to write a goal or check fit-for-goal, or on descriptions of multi-turn tasks that could run unattended. Suggests goal mode when appropriate; pushes back when a task is ill-suited."
 metadata:
   author: xiehuacheng
-  version: "2.2.0"
+  version: "2.2.1"
 ---
 
 # go-goal-go
@@ -24,6 +24,7 @@ Be more proactive than the built-in `write-goal` skill: suggest goal mode when a
 - Modify or cancel an already-running goal.
 - Force a goal onto a task the user has already declined to run in goal mode.
 - Draft a goal whose success criteria cannot be stated as observable behavior.
+- Approve a goal plan whose `<reviewer>` block is not preceded by a dispatch mandate stating that the main loop MUST dispatch it as a sub-agent task and MUST NOT self-judge in place. The canonical phrasing is shown below — accept equivalent wording in the user's language, but the dispatch-as-sub-agent intent and the forbid-in-place intent must both be present.
 - Declare a goal complete before the Reviewer sub-agent has returned `PASS` (or the user explicitly opts out).
 
 ## Default behavior
@@ -72,7 +73,7 @@ A goal plan is **prose**, in the user's language, with one `<reviewer>` block at
 - **Boundaries** — what the loop is allowed to touch (paths) and what it must not do (network, side effects, destructive ops).
 - **Budget** — caps on iterations / wall-clock / cost, plus a stall counter. Plus an optional reserve for handoff.
 - **Stop conditions** — when to stop and ask the user, vs. when to stop and report failure.
-- **Reviewer** — a `<reviewer>` block (template below) where a separate sub-agent independently checks the work.
+- **Reviewer** — a `<reviewer>` block (template below) preceded by a one-line **dispatch mandate** that names the sub-agent and forbids in-place self-judging. Canonical phrasings in English and Chinese are listed in `references/reviewer-template.md`. The host MUST enforce the mandate; a missing or weakened mandate is grounds to refuse starting the goal.
 
 Everything above is plain prose. Host-runtime configuration (sandbox, sub-agent dispatch budget, secret scrubbing, capability boundary, idempotency) is the host's responsibility — see `references/host-internals.md` only if you need to harden the runtime itself; you do not write it.
 
@@ -119,7 +120,8 @@ Stop conditions:
 - need to edit jest/vitest config, tsconfig, or CI workflow: stop and ask.
 - user interrupt: graceful shutdown, persist checkpoint.
 
-Reviewer:
+Reviewer: dispatch an independent sub-agent with the prompt below; the main loop must not self-judge this in place.
+
 <reviewer>
 Role: critic
 
