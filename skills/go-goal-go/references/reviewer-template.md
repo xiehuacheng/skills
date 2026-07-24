@@ -1,98 +1,90 @@
 # Reviewer Sub-agent Template
 
-This template is loaded by `go-goal-go` during Step 4.5 to draft the Reviewer completion gate. The user fills each section in chat. The completed prompt is then embedded into the goal plan as a literal `<reviewer>...</reviewer>` block, and the goal loop dispatches it exactly once at completion. Verdict `PASS` gates completion; `FAIL: <reason>` routes back into the loop or trips the stop rule.
+User-facing prompt-body template for the `<reviewer>` block. Companion to `references/dispatch-primitive.md` (the contract) and `references/contract-glossary.md` §8 (the routing). The user fills this section during Step 5 of `go-goal-go`'s workflow.
 
-## Role
+## Sections
+
+### Role
 
 Pick one:
 
-- **verifier** — checks each acceptance criterion against the current state and reports pass/fail.
+- **verifier** — checks each acceptance criterion against the captured state and reports pass/fail.
 - **critic** — actively looks for flaws, missed edges, and places where the proof is technically true but the intent is unmet.
-- **adversarial reviewer** — assumes the implementation is wrong and tries to break it. Use only when the goal touches security, auth, payments, or data mutation.
+- **adversarial_reviewer** — assumes the implementation is wrong and tries to break it. Use only when the goal touches security, auth, payments, or data mutation. Triggers `sandbox: { file_access: read-only, network: deny }` automatically.
 
 Default: verifier.
 
-## Inputs
+### Inputs
 
-What the Reviewer is allowed to read. Typical options, mix as needed:
+What the Reviewer is allowed to read. Each input MUST be declared in `<dispatch-primitive>` `inputs:` with `(transport, max_bytes, secret_scan)`. Typical options:
 
 - Full goal plan (End state / Proof / Boundaries / Loop / Stop rule)
 - Final diff (e.g. `git diff <base>..HEAD`)
-- Proof command output (e.g. `npm test`, `rg ...`, build logs)
-- Specific file paths under the boundary
-- Current state of long-running or external systems (databases, queues, branches)
+- Proof command output (last invocation, stdout + stderr)
+- Specific file paths under the in-scope boundary
+- Sanitized external state snapshots
 
-Default: full goal plan + final diff + proof command output.
+Default: full goal plan + final diff + last proof output, each with `max_bytes: 262144` and `secret_scan: required`.
 
-## Acceptance Criteria
+### Acceptance Criteria
 
-Concrete pass/fail conditions. Each criterion must be independently checkable from the Inputs. Write them as a short numbered list. Avoid ambiguity.
+Concrete, independently-checkable conditions. **Each criterion must reference an Inputs entry it reads from and a specific check method.** Vague wording ("clean", "good", "works", "looks correct") is rejected.
 
-Examples of good criteria:
+Example of a good criterion (binds to inputs + method):
 
-- Every test that previously failed now passes.
-- No file outside `src/auth` and `test/auth` was modified.
-- No test was deleted or skipped to make it pass.
-- `npm run lint` exits 0 on the final tree.
+```
+1. (a) Reads the file tree under src/auth via the final_diff input; (b) returns PASS only if every file path is under src/auth OR test/auth; (c) FAIL otherwise with reason listing the first violation.
+2. (a) Reads the proof_output input; (b) returns PASS only if it shows "Tests: X passed" with X equal to the previously-known-good count; (c) FAIL if any test was deleted, skipped, or had its assertion weakened.
+```
 
-Examples of bad criteria (rewrite before use):
+Example of a bad criterion (rejected at draft time):
 
-- "The code is clean." — subjective, not checkable.
-- "Everything works." — no evidence requirement.
-- "Looks good." — empty.
+```
+1. The code looks clean.
+```
 
-## Verdict schema
+### Verdict schema
 
-The Reviewer's **last line** of output must be exactly one of:
+The Reviewer's **last line** of output MUST be exactly one of:
 
 - `PASS`
-- `FAIL: <one-line reason>`
+- `FAIL: <one-line reason>` (max 280 chars)
 
-Anything else is treated as `FAIL` and the goal loop demands a re-run with a corrected verdict. Do not allow additional verdict formats (e.g. `SUCCESS`, `APPROVED`, `YES`). Refusal to emit a verdict is itself a `FAIL`.
+Anything else is `REVIEW_INFRA_ERROR: verdict_unparseable` per the dispatch-primitive's parser. The runtime appends `<verdict>...</verdict>` sentinels in some runtimes; the parser handles both.
 
-## Reviewer dispatch (mandatory companion)
+## Skeleton (paste into goal plan)
 
-Every goal plan that ships a `<reviewer>` block MUST also ship a `Reviewer dispatch:` paragraph. This paragraph is the contract between the main goal loop and the sub-agent runtime. The main loop is forbidden from reading the `<reviewer>` block in-place and self-judging the verdict.
-
-The dispatch paragraph must specify, in plain prose:
-
-1. **When** the sub-agent is dispatched (e.g. "when the loop above reports zero failing tests", "after all skills pass quick_validate.py", "on every Nth iteration").
-2. **How** the sub-agent is invoked (e.g. "dispatch the `<reviewer>` block below as a sub-agent task", "use `--task` with this prompt body as the task content").
-3. **How the verdict is read** (e.g. "the sub-agent's last line is the verdict", "anything other than `PASS` or `FAIL: <reason>` is treated as `FAIL`").
-4. **What to do on `FAIL`** (e.g. "route back into the loop", "trip the stop rule", "report to user").
-
-A goal plan with a `<reviewer>` block but no `Reviewer dispatch:` paragraph is malformed and the skill refuses to ship it.
-
-## Embedding template (paste this skeleton into the goal plan)
-
-```text
-Reviewer dispatch:
-- When: <trigger event>
-- How: dispatch the <reviewer> block below as a sub-agent task (do not read it in-place).
-- Verdict: take the sub-agent's last line. Anything other than `PASS` or `FAIL: <one-line reason>` is treated as `FAIL`.
-- On FAIL: <route back into loop / trip stop rule / report to user>.
-
+```
 <reviewer>
-Role: <verifier | critic | adversarial reviewer>
+Role: <verifier | critic | adversarial_reviewer>
 
 Inputs:
-- <list of read sources>
+- <list of input names declared in <dispatch-primitive> inputs:>
 
 Acceptance Criteria:
-1. <criterion — checkable>
-2. <criterion — checkable>
-3. <criterion — checkable>
+1. (a) input: <name>; (b) check: <method>; (c) pass: <condition>; (d) on fail reason: <one-line>.
+2. (a) input: <name>; (b) check: <method>; (c) pass: <condition>; (d) on fail reason: <one-line>.
+3. (a) input: <name>; (b) check: <method>; (c) pass: <condition>; (d) on fail reason: <one-line>.
 
-Verdict: the last line of output must be exactly `PASS` or `FAIL: <one-line reason>`.
+Verdict: last line of output must be exactly `PASS` or `FAIL: <one-line reason>`.
 </reviewer>
 ```
 
+## Reviewer-side behaviors NOT covered here
+
+- **Sandbox enforcement** lives in `<dispatch-primitive>` `sandbox:` and is host-enforced.
+- **Budget enforcement** (max_tokens / max_wall_clock / max_tool_calls / max_retries) lives in `<dispatch-primitive>` `budget:` and is host-enforced.
+- **Verdict parsing** lives in `references/dispatch-primitive.md` §Verdict parser.
+- **Failure classification** (verdict_FAIL vs REVIEW_INFRA_ERROR) lives in `references/dispatch-primitive.md` §Failure classes.
+
+If the Reviewer prompt body contradicts the `<dispatch-primitive>` block (e.g., prompt says "send a Slack message" but `network: deny` is declared), the host treats the prompt as a `<dispatch-primitive>` violation and refuses to dispatch.
+
 ## Opt-out
 
-If the user explicitly declines the Reviewer at Step 4.5, the goal plan must instead contain this literal comment on its own line:
+If the user explicitly declines the Reviewer at Step 5, the goal plan MUST contain this literal comment on its own line:
 
 ```
 <!-- no Reviewer gate: completion by agent self-judgment -->
 ```
 
-The skill states a one-line warning at draft time and once at start time. The user, not the agent, owns the completion decision in this mode.
+The skill states a one-line warning at draft time, surfaces it again on each lifecycle transition (start, resume, completion), and the host DOES NOT enforce any acceptance gate. The user owns the completion decision.
