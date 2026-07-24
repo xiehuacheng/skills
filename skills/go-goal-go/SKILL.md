@@ -3,7 +3,7 @@ name: go-goal-go
 description: "Help users craft /goal objectives that are safe to run unattended: end state, proof, boundaries, budget, lifecycle, stop rule, and a hardened Reviewer sub-agent dispatch primitive. Triggers on user requests in any language asking to write a goal or check fit-for-goal, or on descriptions of multi-turn tasks that could run unattended. Suggests goal mode when appropriate; pushes back when a task is ill-suited."
 metadata:
   author: xiehuacheng
-  version: "2.0.0"
+  version: "2.0.1"
 ---
 
 # go-goal-go
@@ -34,6 +34,7 @@ Help users turn rough intentions into concrete `/goal` objectives that are **saf
 ## Default behavior
 
 - Goal drafting is conversational and read-only until `CreateGoal` is called.
+- **Goal plan prose uses the user's language.** Detect the language from the user's first message and write the goal-plan body (End state descriptions, Acceptance Criteria text, Stop rule descriptions, etc.) in that language. Keep canonical protocol identifiers in English: YAML keys in `<dispatch-primitive>`, verdict strings (`PASS` / `FAIL:`), role names (`verifier` / `critic` / `adversarial_reviewer`), transport modes (`inline` / `path`), failure-class names (`REVIEW_INFRA_ERROR`), and block tags. Keep quoted file paths, commands, regex, and code identifiers exactly as the user wrote them.
 - All discrete choices go through `AskUserQuestion`. Default choices declared in this skill are the recommended values; user override requires explicit selection.
 - The 8-item contract is mandatory; refusal to specify any item means refusal to draft.
 - Boundaries default to project-only paths + deny-all side effects + deny-all network (capability boundary default-deny). User must enumerate every allowed side effect.
