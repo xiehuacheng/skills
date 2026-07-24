@@ -57,7 +57,7 @@ At least three of: queue-shaped, verifiable, bounded, repeatable loop, has budge
 ## Workflow
 
 1. **Assess fit.** Run the goal-fit check. If unsuitable, explain why and stop.
-2. **Confirm intent.** Ask the few discrete choices that matter: any non-default boundary, any non-default budget cap, the Reviewer role if the user has a preference (default `verifier`).
+2. **Confirm intent.** For each discrete choice (boundary, budget caps, Reviewer role): if the user has already specified a value, echo it back for confirmation rather than re-asking; otherwise ask it as an `AskUserQuestion`. Defaults are `verifier` role, project-only paths + deny-all network, 30-min / $2 / 50 iterations / 5-no-progress / 20% reserve.
 3. **Draft the goal.** Write it as natural-language paragraphs covering the items below, in the user's language.
 4. **Show the goal.** Walk through each item, propose tweaks.
 5. **Revise** until the user approves.

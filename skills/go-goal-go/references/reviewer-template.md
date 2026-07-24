@@ -43,7 +43,7 @@ Verdict: last line of your output must be exactly `PASS` or `FAIL: <one-line rea
   - `adversarial_reviewer` — assumes the implementation is wrong and tries to break it. Use only for security / auth / payments / data mutation goals.
 - **Inputs**: list the input names the host should hand to the sub-agent. Host knows how to fetch each of: `final diff`, last `proof output`, `iterations log`, full `goal plan`. Names are plain words; no transport / size / secret-scan declarations needed.
 - **Acceptance**: short, concrete, checkable lines. Each must be something the sub-agent can read from the Inputs and decide pass/fail. Reject vague wording ("looks clean", "good").
-- **Verdict schema**: leave the line above verbatim. The host parses it deterministically; do not invent other formats.
+- **Verdict schema**: leave the line above verbatim. The host enforces a 280-character cap on the `FAIL: <reason>` reason text; longer output is treated as `REVIEW_INFRA_ERROR: verdict_unparseable` (no PASS claim). The host parses deterministically; do not invent other formats.
 
 ## How the host interprets the rest
 
