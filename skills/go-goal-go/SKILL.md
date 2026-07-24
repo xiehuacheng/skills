@@ -1,6 +1,6 @@
 ---
 name: go-goal-go
-description: "Help users craft well-specified /goal objectives: end states, proof, boundaries, stop rules, and a mandatory Reviewer sub-agent (with explicit dispatch paragraph) that gates completion. Triggers on '帮我写个 goal', 'define a goal', '适合 goal 吗', or any multi-turn task that could run unattended. Suggests goal mode when appropriate; pushes back when a task is ill-suited."
+description: "Help users craft well-specified /goal objectives: end states, proof, boundaries, stop rules, and a mandatory Reviewer sub-agent (with explicit dispatch paragraph) that gates completion. Triggers on user requests in any language asking to write a goal or check fit-for-goal, or on descriptions of multi-turn tasks that could run unattended. Suggests goal mode when appropriate; pushes back when a task is ill-suited."
 metadata:
   author: xiehuacheng
   version: "1.3.0"
@@ -41,7 +41,7 @@ Help users turn rough intentions into concrete `/goal` objectives that can run a
 
 Trigger this skill when the user:
 
-- Says phrases like "帮我写个 goal"、"define a goal"、"写一个目标"、"适合 goal 吗".
+- Says in any language that they want to write a goal, define a target, or check whether a task fits goal mode.
 - Describes a multi-step task that could run unattended: fixing all failing tests, migrating a module, auditing issues, refactoring a directory.
 - Asks whether a task should be wrapped in `/goal`.
 - Wants to explicitly name skills or tools to use during autonomous execution.
