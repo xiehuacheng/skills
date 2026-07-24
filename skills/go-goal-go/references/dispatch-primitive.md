@@ -1,5 +1,7 @@
 # Canonical Dispatch Primitive
 
+> **High tier only.** At low or standard tier, the user only writes a plain `<reviewer>` block (4 sections); the host fills in the safe defaults listed in `references/reviewer-template.md`. Read this file only when designing or hardening a goal at high risk class.
+
 Authoritative contract between the main goal loop and the sub-agent runtime. This file defines exactly one primitive, used for the Reviewer sub-agent. Hosts MUST implement exactly this primitive; the goal plan's `<dispatch-primitive>` block is a YAML instance of this schema.
 
 ## Primitive: `dispatch_review_subagent`

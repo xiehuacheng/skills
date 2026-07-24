@@ -1,5 +1,7 @@
 # Capability Boundary
 
+> **High tier only.** Low and standard tier rely on the host's default capability boundary (read-only in-scope paths, deny-all network). Read this file only when designing or hardening a goal at high risk class.
+
 Default-deny capability envelope for `/goal` runs. Every goal MUST run inside this boundary. The boundary is the runtime's responsibility, not the goal plan's; the goal plan declares *policy* and the host *enforces*.
 
 ## Default posture

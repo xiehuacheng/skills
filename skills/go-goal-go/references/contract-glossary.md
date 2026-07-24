@@ -1,12 +1,12 @@
-# Contract Glossary
+# Contract Glossary by Risk Class
 
-Each of the 8 contract items, with parsing rules and accepted predicates. This file is the authoritative grammar for `/goal` plans.
+Grammar for each of the contract items. Items marked with `[standard]` are required at standard tier (default); items marked with `[high]` are required only at high tier; everything else is recommended or host-applied.
 
-## 1. End state
+## 1. End state `[standard]`
 
 A runtime-detectable target the loop can verify independent of any proof command.
 
-Required: at least one **anchor**, each of the form:
+Required: at least one anchor:
 
 ```yaml
 - kind: file_exists       # or file_contains, file_absent
@@ -15,61 +15,61 @@ Required: at least one **anchor**, each of the form:
 
 - kind: branch_state
   name: <branch>
-  condition: ahead|behind|at|sha_present
+  condition: ahead | behind | at | sha_present
   value: <int or sha>
 
 - kind: count
   source: <rg pattern or command>
-  min: <int>                # at least N
-  max: <int>                # or no more than N
+  min: <int>
+  max: <int>
 
 - kind: external_state
   endpoint: <url>
   response_predicate: <jq or regex>
-
-- kind: set_diff
-  base_set: <command returning list>
-  target_set: <command returning list>
-  relationship: superset | subset | equal
 ```
 
-A pure prose anchor ("the code is healthier") is rejected.
+A pure prose anchor is rejected.
 
-## 2. Proof
+## 2. Proof `[standard]`
 
-The trigger that the loop uses during iteration. Each Proof entry must specify:
+The trigger the loop uses during iteration.
 
 ```yaml
-- name: <short id, e.g. "npm-test-auth">
+- name: <short id>
   command: <shell command>
   exit_code: <int>          # default 0
   regex:                    # optional alternative to exit code
     output: <pattern>
     flags: <re flags>
-  timeout_seconds: <int>    # mandatory, no default of "infinity"
+  timeout_seconds: <int>    # mandatory
   flake_policy:             # mandatory
-    consecutive_passes_needed: <int>     # e.g. 2 consecutive clean runs
+    consecutive_passes_needed: <int>     # e.g. 2 or 3
     flakiness_classification: never_promote
-  env_snapshot:             # mandatory
-    working_tree: clean | any
-    pinned_dependencies: true | false
-    locked_seed: true | false             # tests with randomness require this
-    timezone: <tz>                         # for time-sensitive tests
-  expected_attempts:        # bounded
-    max: <int>              # e.g. 3
+  expected_attempts:
+    max: <int>              # bounded
 ```
 
-A Proof without `timeout_seconds`, `flake_policy`, or `env_snapshot` is rejected.
+A Proof without `timeout_seconds` or `flake_policy` is rejected.
 
-## 3. Boundaries
+## 3. Boundaries `[standard]`
 
-The action envelope. Four required sub-fields:
+Default tier — paths + side-effect allow-list:
 
 ```yaml
 in_scope_paths:
   - <repo-relative glob>
-side_effect_allowlist:    # default-deny; enumerate every allowed class
-  - read | write | send | pay
+side_effect_allowlist:    # default-deny
+  - read                   # always implicit
+  - write                  # only if in in_scope_paths
+  # - send                  # opt-in only
+  # - pay                   # opt-in only
+```
+
+A goal with no `side_effect_allowlist` runs in read-only mode.
+
+`[high]` adds:
+
+```yaml
 network:
   policy: deny | allowlist
   allowlist:
@@ -79,94 +79,110 @@ reversibility:
   rollback_procedure: <text or command>      # mandatory for non-reversible
 ```
 
-A goal with no `side_effect_allowlist` runs in read-only mode. Add write, send, or pay only by enumeration.
-
-## 4. Loop
-
-Iteration strategy + checkpoint cadence + resume rule.
-
-```yaml
-strategy: sequential | parallel_with_fixed_pool | orchestrator_workers
-worker_pool_size: <int>            # 1 if sequential
-checkpoint_cadence:
-  every_n_iterations: <int>        # e.g. every iteration
-  every_n_minutes: <int>
-  on_every_successful_fix: true | false
-resume_rule:
-  source_of_truth: last_checkpoint | first_failure | iteration_zero
-  revalidate_before_continue: true
-```
-
-Sequential strategy defaults to worker_pool_size 1. Parallel strategy without a fixed pool size is rejected (fork-bomb prevention).
-
-## 5. Budget
-
-Hard numeric caps. Five required fields.
+## 4. Budget `[standard]`
 
 ```yaml
 max_iterations: <int>             # default 50
 max_wall_clock: <duration string> # default "30m"
 max_cost: <USD or token count>    # default $2
-max_no_progress: <int>            # default 5; consecutive iterations with no new passing anchor
-completion_reserve: <percentage of max_cost>  # default 20% of max_cost; reserved for handoff + Reviewer dispatch
+max_no_progress: <int>            # default 5
+completion_reserve: <percentage of max_cost>  # default 20% of max_cost; reserved for handoff + Reviewer
 ```
 
-On any cap: BudgetStop fires. The loop terminates with a cost summary and a compact machine-readable handoff in `goal-logs/<run-id>/handoff.json`. BudgetStop never counts as PASS.
+On any cap: BudgetStop fires; loop terminates with cost summary in `goal-logs/<run-id>/handoff.json`. BudgetStop never counts as PASS.
 
-## 6. Lifecycle
+## 5. Reviewer `[standard default-on]`
 
-The run identity and resumability anchors.
+At standard tier the user provides a plain `<reviewer>` block (4 sections in `references/reviewer-template.md`). Host fills safe defaults:
+
+- role: `verifier` (user can pick `critic` or `adversarial_reviewer`)
+- sandbox: read-only / deny-network / deny-git-push / secret_scrub required
+- budget: max_tokens=4000 / max_wall_clock_seconds=180 / max_tool_calls=30 / max_retries_on_malformed=1 / max_retries_on_dispatch_error=0
+- verdict_parser: deterministic-trim-blank-regex (see `references/dispatch-primitive.md`)
+- on_fail: route_back_to_loop_with_iteration_decrement
+
+`[high]` tier replaces these defaults with an explicit `<dispatch-primitive>` block (see `references/dispatch-primitive.md`).
+
+Opt-out at any tier (use with explicit user confirmation):
+
+```
+<!-- no Reviewer gate: completion by agent self-judgment -->
+```
+
+## 6. Loop `[standard: host default | high: explicit]`
+
+Standard tier: host applies these defaults if the goal plan does not override.
+
+```yaml
+strategy: sequential               # default
+worker_pool_size: 1                # default
+checkpoint_cadence:
+  every_n_iterations: 1
+  on_every_successful_fix: true
+resume_rule:
+  source_of_truth: last_checkpoint
+  revalidate_before_continue: true
+```
+
+`[high]` tier:
+
+```yaml
+strategy: sequential | parallel_with_fixed_pool | orchestrator_workers
+worker_pool_size: <int>            # mandatory if parallel
+checkpoint_cadence:
+  every_n_iterations: <int>
+  every_n_minutes: <int>
+resume_rule:
+  source_of_truth: last_checkpoint | first_failure | iteration_zero
+  revalidate_before_continue: true
+```
+
+## 7. Stop rule `[standard: host default | high: explicit]`
+
+At standard tier the host applies sensible defaults (HardStop on out-of-scope writes / unauthorized side effects; SoftStop on shared-infra edit, user interrupt, cost projection overrun).
+
+`[high]` tier:
+
+```yaml
+HardStop:
+  - <trigger event 1>
+  - <trigger event 2>
+SoftStop:
+  - <trigger event 1>
+  - <trigger event 2>
+```
+
+BudgetStop lives in `Budget`. Reviewer FAIL is not a stop — it routes back into Loop iteration.
+
+## 8. Lifecycle `[standard: host default | high: explicit]`
+
+Standard tier: host computes `plan_hash` + `base_commit` + `tool_versions` at start and writes them to `goal-logs/<run-id>/manifest.json`.
+
+`[high]` tier goal plan must explicitly declare:
 
 ```yaml
 plan_hash: <sha256 of the canonicalized approved plan>
 base_commit: <sha>
 tool_versions:
   - name: <tool>
-    version: <pinned or "snapshot">
-run_id: <uuid>                     # assigned by host at start
-artifacts:
-  manifest: goal-logs/<run-id>/manifest.json
-  iteration_log: goal-logs/<run-id>/iterations.jsonl
-  proof_captures: goal-logs/<run-id>/proofs/
-  reviewer_output: goal-logs/<run-id>/reviewer.txt
-  tool_audit: goal-logs/<run-id>/tool-audit.log
+    version: <pinned>
 states:
   - DRAFT
-  - APPROVED                  # explicit user approval + plan hash computed
+  - APPROVED
   - RUNNING
-  - PAUSED                    # SoftStop or CANCEL_REQUESTED pending
-  - CANCEL_REQUESTED          # graceful shutdown in progress
+  - PAUSED
+  - CANCEL_REQUESTED
   - CANCELLED
-  - COMPLETED                 # Reviewer verdict PASS + artifacts written
-  - FAILED                    # HardStop or unrecoverable infra
+  - COMPLETED
+  - FAILED
 ```
 
-On resume, the runtime compares `plan_hash` + `base_commit` + `tool_versions` against the current state. Drift → pause for re-approval, never merge silently.
+On resume, runtime compares against current state. Drift → pause for re-approval.
 
-## 7. Stop rule
+## Routing summary by tier
 
-Categorized stops. Two categories live in this item; others live elsewhere.
-
-- **HardStop** — terminal safety violation. Loop terminates immediately; no resume. Examples: modifying outside Boundaries; running side-effect not in allow-list; capability boundary breach.
-- **SoftStop** — pause + ask. Persist checkpoint, surface reason to user, await re-approval. Examples: shared infra changes needed; cost projection exceeds remaining Budget; user-injected interrupt.
-
-`BudgetStop` lives in `Budget`. `ReviewerStop` (route-back into Loop on Reviewer FAIL) lives in `Reviewer`. Lifecycle `CANCEL_REQUESTED` lives in `Lifecycle`.
-
-## 8. Reviewer
-
-Two blocks in the goal plan. Either block missing is malformed.
-
-### `<dispatch-primitive>` block
-
-Authoritative contract between main loop and sub-agent runtime. Schema in `references/dispatch-primitive.md`. Required keys: `primitive`, `version`, `role`, `when`, `budget`, `sandbox`, `verdict_parser`, `inputs`, `on_fail`, `artifacts`.
-
-### `<reviewer>` block
-
-Prompt body the sub-agent receives. Schema in `references/reviewer-template.md`. Required sections: `Role`, `Inputs`, `Acceptance Criteria`, `Verdict`.
-
-### Routing
-
-- `verdict == PASS` → goal declared COMPLETED, artifacts finalized.
-- `verdict == FAIL: <reason>` → route back into Loop, decrement Budget. NOT a stop.
-- `REVIEW_INFRA_ERROR` (timeout, OOM, refused, empty) → SoftStop-class pause, surface to user with partial output, no code change.
-- Any other output → treated as `REVIEW_INFRA_ERROR: verdict_unparseable: <tail>`.
+| Tier | Items | Required items | At completion goal becomes `COMPLETED` when |
+|---|---|---|---|
+| low | 2 | End state, Proof | proof passes (no Reviewer unless opted in) |
+| standard | 5 | End state, Proof, Boundaries, Budget, Reviewer (default-on) | proof passes AND Reviewer verdict == `PASS` |
+| high | 8 | All standard + Loop, Lifecycle, Stop rule, hardened Reviewer | proof passes AND Reviewer verdict == `PASS` AND no BudgetStop AND no HardStop |

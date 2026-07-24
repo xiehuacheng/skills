@@ -1,6 +1,6 @@
 # Reviewer Sub-agent Template
 
-User-facing prompt-body template for the `<reviewer>` block. Companion to `references/dispatch-primitive.md` (the contract) and `references/contract-glossary.md` §8 (the routing). The user fills this section during Step 5 of `go-goal-go`'s workflow.
+User-facing prompt-body template for the `<reviewer>` block. At **standard** tier only the 4 sections below are required; the host fills in safe defaults for everything else. At **high** tier the user replaces those defaults with an explicit `<dispatch-primitive>` block — see `references/dispatch-primitive.md`.
 
 ## Sections
 
@@ -10,81 +10,93 @@ Pick one:
 
 - **verifier** — checks each acceptance criterion against the captured state and reports pass/fail.
 - **critic** — actively looks for flaws, missed edges, and places where the proof is technically true but the intent is unmet.
-- **adversarial_reviewer** — assumes the implementation is wrong and tries to break it. Use only when the goal touches security, auth, payments, or data mutation. Triggers `sandbox: { file_access: read-only, network: deny }` automatically.
+- **adversarial_reviewer** — assumes the implementation is wrong and tries to break it. Use only when the goal touches security, auth, payments, or data mutation. Forces read-only + no-network + no-git-push sandbox.
 
 Default: verifier.
 
 ### Inputs
 
-What the Reviewer is allowed to read. Each input MUST be declared in `<dispatch-primitive>` `inputs:` with `(transport, max_bytes, secret_scan)`. Typical options:
+List the names of inputs the host auto-collects. Typical options:
 
-- Full goal plan (End state / Proof / Boundaries / Loop / Stop rule)
-- Final diff (e.g. `git diff <base>..HEAD`)
-- Proof command output (last invocation, stdout + stderr)
-- Specific file paths under the in-scope boundary
-- Sanitized external state snapshots
-
-Default: full goal plan + final diff + last proof output, each with `max_bytes: 262144` and `secret_scan: required`.
+- `final_diff` — `git diff <base>..HEAD`
+- `proof_output` — last proof invocation stdout + stderr (or last N for flake policy)
+- `iterations_log` — `goal-logs/<run-id>/iterations.jsonl`
+- `goal_plan` — the full approved plan text
 
 ### Acceptance Criteria
 
-Concrete, independently-checkable conditions. **Each criterion must reference an Inputs entry it reads from and a specific check method.** Vague wording ("clean", "good", "works", "looks correct") is rejected.
+**Each criterion must reference an Inputs entry it reads from and a specific check method.** Vague wording ("clean", "good", "works", "looks correct") is rejected.
 
-Example of a good criterion (binds to inputs + method):
-
-```
-1. (a) Reads the file tree under src/auth via the final_diff input; (b) returns PASS only if every file path is under src/auth OR test/auth; (c) FAIL otherwise with reason listing the first violation.
-2. (a) Reads the proof_output input; (b) returns PASS only if it shows "Tests: X passed" with X equal to the previously-known-good count; (c) FAIL if any test was deleted, skipped, or had its assertion weakened.
-```
-
-Example of a bad criterion (rejected at draft time):
+Example of a good criterion:
 
 ```
-1. The code looks clean.
+1. (a) input: final_diff; (b) check: enumerate changed file paths;
+   (c) pass: every path is under src/auth/ or test/auth/;
+   (d) on fail reason: 'out-of-scope: <path>'.
 ```
 
 ### Verdict schema
 
-The Reviewer's **last line** of output MUST be exactly one of:
+The Reviewer's **last line** of output must be exactly one of:
 
 - `PASS`
 - `FAIL: <one-line reason>` (max 280 chars)
 
-Anything else is `REVIEW_INFRA_ERROR: verdict_unparseable` per the dispatch-primitive's parser. The runtime appends `<verdict>...</verdict>` sentinels in some runtimes; the parser handles both.
+Anything else is `REVIEW_INFRA_ERROR: verdict_unparseable` per the dispatch-primitive's parser.
 
-## Skeleton (paste into goal plan)
+## Skeleton (paste into goal plan at standard tier)
 
 ```
 <reviewer>
 Role: <verifier | critic | adversarial_reviewer>
 
 Inputs:
-- <list of input names declared in <dispatch-primitive> inputs:>
+- final_diff
+- proof_output
+- iterations_log
 
 Acceptance Criteria:
-1. (a) input: <name>; (b) check: <method>; (c) pass: <condition>; (d) on fail reason: <one-line>.
-2. (a) input: <name>; (b) check: <method>; (c) pass: <condition>; (d) on fail reason: <one-line>.
-3. (a) input: <name>; (b) check: <method>; (c) pass: <condition>; (d) on fail reason: <one-line>.
+1. (a) input: <name>; (b) check: <method>; (c) pass: <condition>; (d) on fail reason: <one line>.
+2. (a) input: <name>; (b) check: <method>; (c) pass: <condition>; (d) on fail reason: <one line>.
 
 Verdict: last line of output must be exactly `PASS` or `FAIL: <one-line reason>`.
 </reviewer>
 ```
 
-## Reviewer-side behaviors NOT covered here
+## Host-applied defaults at standard tier
 
-- **Sandbox enforcement** lives in `<dispatch-primitive>` `sandbox:` and is host-enforced.
-- **Budget enforcement** (max_tokens / max_wall_clock / max_tool_calls / max_retries) lives in `<dispatch-primitive>` `budget:` and is host-enforced.
-- **Verdict parsing** lives in `references/dispatch-primitive.md` §Verdict parser.
-- **Failure classification** (verdict_FAIL vs REVIEW_INFRA_ERROR) lives in `references/dispatch-primitive.md` §Failure classes.
+The skill (or runtime) fills these in automatically when the goal plan only contains the 4-section block:
 
-If the Reviewer prompt body contradicts the `<dispatch-primitive>` block (e.g., prompt says "send a Slack message" but `network: deny` is declared), the host treats the prompt as a `<dispatch-primitive>` violation and refuses to dispatch.
+- role: `verifier` if unspecified
+- sandbox: read-only + deny-network + deny-git-push + secret_scrub required
+- budget: `max_tokens=4000`, `max_wall_clock_seconds=180`, `max_tool_calls=30`, `max_retries_on_malformed=1`, `max_retries_on_dispatch_error=0`
+- verdict_parser: `deterministic-trim-blank-regex`
+- on_fail: `route_back_to_loop_with_iteration_decrement`
+- artifacts: `goal-logs/<run-id>/reviewer.txt` and `verdict.txt`; retention 90 days
+- idempotency_key: `sha256(run_id + iteration + role)` (host-generated)
 
-## Opt-out
+## At high tier — replace defaults with `<dispatch-primitive>` block
 
-If the user explicitly declines the Reviewer at Step 5, the goal plan MUST contain this literal comment on its own line:
+Replace the host defaults by writing a `<dispatch-primitive>` block in the goal plan with explicit `budget`, `sandbox`, `verdict_parser`, `idempotency_key`, `inputs` (with `transport`, `max_bytes`, `secret_scan`), and `on_fail`. See `references/dispatch-primitive.md`.
+
+If the goal plan contains both a `<reviewer>` block AND a `<dispatch-primitive>` block, the `<dispatch-primitive>` values take precedence over the host defaults.
+
+## Verdict parsing (standard across all tiers)
+
+`deterministic-trim-blank-regex`:
+
+1. Trim trailing whitespace.
+2. Split on `\n`; drop trailing blank lines.
+3. Take the last non-blank line.
+4. Match case-sensitive regex `^(PASS|FAIL:.{1,280})$`.
+5. Anything else → `REVIEW_INFRA_ERROR: verdict_unparseable`. Last 5 lines retained for diagnosis.
+
+## Opt-out (any tier)
+
+If the user explicitly declines the Reviewer at draft time, the goal plan must contain this literal comment on its own line:
 
 ```
 <!-- no Reviewer gate: completion by agent self-judgment -->
 ```
 
-The skill states a one-line warning at draft time, surfaces it again on each lifecycle transition (start, resume, completion), and the host DOES NOT enforce any acceptance gate. The user owns the completion decision.
+The skill surfaces the warning at draft, start, and resume; the host does not enforce any acceptance gate. The user owns completion.
