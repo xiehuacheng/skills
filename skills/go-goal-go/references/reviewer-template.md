@@ -50,9 +50,28 @@ The Reviewer's **last line** of output must be exactly one of:
 
 Anything else is treated as `FAIL` and the goal loop demands a re-run with a corrected verdict. Do not allow additional verdict formats (e.g. `SUCCESS`, `APPROVED`, `YES`). Refusal to emit a verdict is itself a `FAIL`.
 
+## Reviewer dispatch (mandatory companion)
+
+Every goal plan that ships a `<reviewer>` block MUST also ship a `Reviewer dispatch:` paragraph. This paragraph is the contract between the main goal loop and the sub-agent runtime. The main loop is forbidden from reading the `<reviewer>` block in-place and self-judging the verdict.
+
+The dispatch paragraph must specify, in plain prose:
+
+1. **When** the sub-agent is dispatched (e.g. "when the loop above reports zero failing tests", "after all skills pass quick_validate.py", "on every Nth iteration").
+2. **How** the sub-agent is invoked (e.g. "dispatch the `<reviewer>` block below as a sub-agent task", "use `--task` with this prompt body as the task content").
+3. **How the verdict is read** (e.g. "the sub-agent's last line is the verdict", "anything other than `PASS` or `FAIL: <reason>` is treated as `FAIL`").
+4. **What to do on `FAIL`** (e.g. "route back into the loop", "trip the stop rule", "report to user").
+
+A goal plan with a `<reviewer>` block but no `Reviewer dispatch:` paragraph is malformed and the skill refuses to ship it.
+
 ## Embedding template (paste this skeleton into the goal plan)
 
-```xml
+```text
+Reviewer dispatch:
+- When: <trigger event>
+- How: dispatch the <reviewer> block below as a sub-agent task (do not read it in-place).
+- Verdict: take the sub-agent's last line. Anything other than `PASS` or `FAIL: <one-line reason>` is treated as `FAIL`.
+- On FAIL: <route back into loop / trip stop rule / report to user>.
+
 <reviewer>
 Role: <verifier | critic | adversarial reviewer>
 
