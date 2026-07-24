@@ -1,9 +1,9 @@
 ---
 name: go-goal-go
-description: Help users craft well-specified /goal objectives with clear end states, proof, boundaries, and stop rules. Trigger when the user asks for goal writing, wants to turn a multi-turn task into an autonomous run, or describes work that could benefit from goal mode. Proactively suggests goal mode when appropriate, lets users explicitly name skills/system tools to use inside the loop, and pushes back honestly when a task is ill-suited for goal execution.
+description: "Help users craft well-specified /goal objectives: end states, proof, boundaries, stop rules, and a mandatory Reviewer sub-agent that gates completion. Triggers on '帮我写个 goal', 'define a goal', '适合 goal 吗', or any multi-turn task that could run unattended. Suggests goal mode when appropriate; pushes back when a task is ill-suited."
 metadata:
   author: xiehuacheng
-  version: "1.1.0"
+  version: "1.2.0"
 ---
 
 # go-goal-go
@@ -24,13 +24,18 @@ Help users turn rough intentions into concrete `/goal` objectives that can run a
 - Modify or cancel an already-running goal.
 - Force a goal onto a task the user has already declined to run in goal mode.
 - Auto-select skills or tools for the user; only include those the user explicitly names.
+- Start a goal whose goal plan lacks a `<reviewer>` block without a user-confirmed skip line.
+- Treat a missing or unparseable Reviewer verdict as a pass.
+- Declare a goal complete before the Reviewer sub-agent has returned `PASS` (or the user has confirmed an explicit skip).
 
 ## Default behavior
 
 - Goal drafting is conversational and read-only until `CreateGoal` is called.
-- All discrete choices (scope, proof method, whether to add skill declarations, budget) go through `AskUserQuestion`.
+- All discrete choices (scope, proof method, whether to add skill declarations, Reviewer inclusion, budget) go through `AskUserQuestion`.
 - A task that fails the "goal-fit" check gets an honest pushback, not a silently weakened goal.
 - Skill/tool declarations are optional; if the user declines, omit the section rather than invent one.
+- The Reviewer block is required by default. If the user explicitly opts out, append the literal skip comment to the goal plan; do not infer opt-out from silence.
+- The Reviewer is dispatched exactly once at the end of the loop. If `FAIL`, route back into loop iteration or trigger the stop rule — never silently approve.
 
 ## When to use
 
@@ -70,6 +75,7 @@ If the task hits **zero or one** signal, push back and explain which signal is m
 2. **Confirm intent.** Ask what outcome the user wants and what would prove it is done. Use `AskUserQuestion` for any discrete choice.
 3. **Draft the goal.** Write a concrete objective covering end state, proof, boundaries, loop, and stop rule. Use the user's language.
 4. **Offer skill/tool declaration.** Ask whether to add an explicit "Use these skills/tools" section to the goal plan.
+4.5. **Draft the Reviewer sub-agent.** Default to including a Reviewer completion gate. Load `references/reviewer-template.md`, walk the user through it, embed the filled prompt as a literal `<reviewer>...</reviewer>` block in the goal plan. Refuse to proceed if the verdict schema is malformed. If the user explicitly opts out, append `<!-- no Reviewer gate: completion by agent self-judgment -->` to the goal plan and restate the warning once. See `references/reviewer-protocol.md` for the protocol detail.
 5. **Show the full goal.** Present the exact wording and walk through the choices.
 6. **Revise together.** Repeat drafting until the user approves.
 7. **Start the goal.** Call `CreateGoal` only after explicit approval.
@@ -83,8 +89,11 @@ A strong goal should include:
 - **Boundaries** — what may and may not be touched.
 - **Loop** — how to iterate when the work is queue-shaped.
 - **Stop rule** — when to stop and report instead of forcing a pass.
+- **Reviewer** — a sub-agent the goal loop dispatches at completion; verdict `PASS` gates completion. See Step 4.5.
 
-## Optional skill/tool declaration
+## Optional skill/tool declaration & mandatory Reviewer
+
+### Skill/tool declaration (optional)
 
 If the user wants to name skills or system capabilities for the loop, add a section like this to the goal plan:
 
@@ -95,6 +104,10 @@ Skills / tools to use inside the loop:
 ```
 
 Replace `<skill-name>` with skills the user actually has installed and explicitly named. Do not auto-populate the list.
+
+### Reviewer (mandatory)
+
+The Reviewer is required by default — a self-contained sub-agent prompt the goal loop dispatches once at completion. Its verdict (`PASS` or `FAIL: <one-line reason>`) gates goal completion. See Step 4.5, `references/reviewer-template.md` (the user-facing template), and `references/reviewer-protocol.md` (full drafting/skip mechanics).
 
 ## Examples
 
@@ -108,9 +121,28 @@ Replace `<skill-name>` with skills the user actually has installed and explicitl
 - User: "Help me understand this codebase."
 - Response: "This sounds like open-ended exploration. Goal mode works best when there is a clear finish line and a way to prove it. If you want, we can turn it into a bounded audit (e.g., 'List all unused exports in src/ and remove them'), or I can answer questions turn by turn."
 
+**Goal with a Reviewer gate**
+
+- End state: every failing test under `test/auth` passes.
+- Proof: `npm test -- test/auth` exits 0.
+- Boundaries: only files under `src/auth` and `test/auth`.
+- Loop: rerun `npm test -- test/auth` after each fix until no failures remain.
+- Stop rule: stop and ask if a fix requires changing shared infra.
+- Reviewer (verifier):
+  - Inputs: final diff + `npm test -- test/auth` output + the End state above.
+  - Acceptance: (a) every previously failing test now passes; (b) no file outside `src/auth` or `test/auth` was modified; (c) no test was deleted or skipped to make it pass.
+  - Verdict: `PASS` or `FAIL: <one-line reason>`.
+
+**Honest Reviewer opt-out**
+
+- Same goal as above, with the Reviewer block replaced by:
+  `<!-- no Reviewer gate: completion by agent self-judgment -->`
+- The skill surfaces a one-line warning at draft time, and the warning is restated once when the goal starts. The user, not the skill, owns the completion decision in this mode.
+
 ## Error handling & edge cases
 
 - **User declines goal mode after suggestion:** Respect the decision. Do not bring it up again for the same task.
 - **User asks for a goal with no proof:** Refuse to draft until a verification method is identified or added.
 - **User names a skill that may not exist:** Include the name as declared, and add a reminder to verify the skill is available before the loop runs.
 - **Goal wording is too vague:** Ask the user to pick one concrete finish line. Do not proceed with multiple competing interpretations.
+- **Reviewer-related edge cases** (opt-out mechanics, malformed verdict, proof vs Reviewer conflict, multi-turn attempts): see `references/reviewer-protocol.md`.
