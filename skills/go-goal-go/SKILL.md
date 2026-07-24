@@ -37,7 +37,7 @@ Help users turn rough intentions into concrete `/goal` objectives that are **saf
 - All discrete choices go through `AskUserQuestion`. Default choices declared in this skill are the recommended values; user override requires explicit selection.
 - The 8-item contract is mandatory; refusal to specify any item means refusal to draft.
 - Boundaries default to project-only paths + deny-all side effects + deny-all network (capability boundary default-deny). User must enumerate every allowed side effect.
-- Budget defaults: `max_iterations = 50`, `max_wall_clock = 30m`, `max_cost = $2`, `max_no_progress = 5`, completion reserve 20%.
+- Budget defaults: `max_iterations = 50`, `max_wall_clock = 30m`, `max_cost = $2`, `max_no_progress = 5`, `completion_reserve = 20% of max_cost` (reserved for handoff + Reviewer dispatch).
 - Reviewer role defaults to `verifier`. Adversarial role requires explicit user choice and triggers default-deny sandbox.
 - The Reviewer is dispatched **exactly once per goal iteration** at completion, by canonical primitive `dispatch_review_subagent`. Verdict parsed by the deterministic parser in `references/dispatch-primitive.md`.
 - Per-iteration fail / Reviewer FAIL routes back into Loop iteration, not a new stop. Counts against Budget.
@@ -154,6 +154,7 @@ on_fail: route_back_to_loop_with_iteration_decrement
 artifacts:
   reviewer_output: goal-logs/<run-id>/reviewer.txt
   user_visible_summary_on_fail: one_paragraph
+idempotency_key: <derived from run_id + iteration + role>
 </dispatch-primitive>
 ```
 

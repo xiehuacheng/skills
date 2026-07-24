@@ -108,7 +108,7 @@ max_iterations: <int>             # default 50
 max_wall_clock: <duration string> # default "30m"
 max_cost: <USD or token count>    # default $2
 max_no_progress: <int>            # default 5; consecutive iterations with no new passing anchor
-completion_reserve: <percentage>  # default 20%; reserved for handoff + Reviewer dispatch
+completion_reserve: <percentage of max_cost>  # default 20% of max_cost; reserved for handoff + Reviewer dispatch
 ```
 
 On any cap: BudgetStop fires. The loop terminates with a cost summary and a compact machine-readable handoff in `goal-logs/<run-id>/handoff.json`. BudgetStop never counts as PASS.
