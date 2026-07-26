@@ -60,7 +60,7 @@ The harness's skills directory does not exist. This is normal for harnesses the 
 
 ## "duplicate skills across harnesses" trigger phrase
 
-The user has noticed the same skill in two harness dirs. Run `merge.sh` to consolidate. Conflicts will be recorded in the report and the conflict-versions tree.
+The user has noticed the same skill in two harness dirs. Run `merge.sh` in dry-run mode to see what would be preserved, then re-run with `--apply` after the user confirms. Conflicts will be recorded in the report and the conflict-versions tree.
 
 ## "skills disappeared from [harness]"
 
@@ -107,4 +107,4 @@ Fix: delete the bad symlink with `mavis-trash` and re-run `symlink.sh` with the 
 
 - The full backup is in `~/skills-backup-<ts>.tar.gz`.
 - The full conflict-versions tree is in `~/.skills-conflict-versions-<ts>/`.
-- You can always restore by extracting the tarball and re-running `merge.sh` with the original canonical.
+- You can always restore by extracting the tarball and re-running `merge.sh --apply` with the original canonical.

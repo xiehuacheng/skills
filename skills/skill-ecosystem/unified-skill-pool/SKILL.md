@@ -70,7 +70,7 @@ Before running any setup or migration, confirm:
 2. The canonical location is writable. Default `~/.agents/skills/`.
 3. `mavis-trash` is available on `PATH` (`which mavis-trash`).
 4. The user has read permission on every harness's existing skills directory.
-5. The user has explicitly approved the destructive flow (move + symlink). The skill never auto-runs migration.
+5. The user has explicitly approved the destructive flow (move + symlink). The skill never auto-runs migration. **Additionally**, the destructive `merge.sh` script defaults to dry-run mode; the agent must pass `--apply` after showing the user the dry-run report.
 
 ## Core workflow
 
@@ -81,15 +81,20 @@ The skill has three flows, all built on the same script set. Use the flow that m
 1. Run `scripts/detect.sh` to enumerate installed harnesses and their skill paths.
 2. Confirm the canonical location with the user (default `~/.agents/skills/`).
 3. Show the user the detected harness list and ask: "These are the harnesses I will pool together - proceed?"
-4. Run `scripts/merge.sh <harness-list-json> <canonical>`:
+4. Run `scripts/merge.sh <harness-list-json> <canonical>` in **dry-run** mode (the default — no `--apply` flag):
+   - Reads harness list and computes what would move / conflict / be trashed.
+   - Creates no backup, performs no actions.
+   - Outputs a JSON report with `dry_run: true` showing the planned actions.
+5. Show the user the dry-run report. Ask: "This is what would happen. Proceed? I will then re-run with `--apply` to execute."
+6. After user confirmation, re-run `scripts/merge.sh <harness-list-json> <canonical> --apply`:
    - Create backup tarball at `~/skills-backup-<ts>.tar.gz` first.
    - Move each skill from each harness into canonical, applying conflict policy.
    - Move harness-side leftovers (`.DS_Store`, hidden dirs, etc.) to the trash via `mavis-trash`.
-   - Output JSON report to stdout: `{"moved": [...], "skipped": [...], "conflicts": [...], "backup_path": "..."}`.
-5. Show the user the report. Ask: "Conflicts were preserved in `~/.skills-conflict-versions-<ts>/`. Proceed to symlinking?"
-6. Run `scripts/symlink.sh <harness-list-json> <canonical>` to replace each harness's skills dir with a symlink.
-7. Run `scripts/verify.sh` to confirm every harness sees the full pool.
-8. Hand the user the management entrypoint at `~/.agents/skills/skills-sync.sh` for future maintenance.
+   - Output JSON report to stdout: `{"dry_run": false, "moved": [...], "skipped": [...], "conflicts": [...], "backup_path": "..."}`.
+7. Show the user the apply report. Ask: "Conflicts were preserved in `~/.skills-conflict-versions-<ts>/`. Proceed to symlinking?"
+8. Run `scripts/symlink.sh <harness-list-json> <canonical>` to replace each harness's skills dir with a symlink.
+9. Run `scripts/verify.sh` to confirm every harness sees the full pool.
+10. Hand the user the management entrypoint at `~/.agents/skills/skills-sync.sh` for future maintenance.
 
 ### Flow 2 - Maintenance
 
@@ -119,7 +124,7 @@ The skill has three flows, all built on the same script set. Use the flow that m
 ## Expected outputs
 
 - **detect.sh:** JSON list of harnesses with their skill dir paths and current item counts.
-- **merge.sh:** JSON report of moved/skipped/conflicts plus backup tarball path.
+- **merge.sh:** JSON report with `dry_run` boolean; when `true`, lists `would_move` / `would_conflict` / `would_backup_paths` and performs no actions. When `false` (via `--apply`), lists actual `moved` / `conflicts` plus `backup_path`.
 - **symlink.sh:** Per-harness pass/fail with the symlink target.
 - **verify.sh:** Human-readable table of every harness plus symlink health.
 - **install-skill.sh:** Confirmation of the new skill's path in canonical and that every harness can list it.
