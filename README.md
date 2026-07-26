@@ -11,7 +11,7 @@
 用 [skills.sh](https://skills.sh/) CLI：
 
 ```bash
-npx skills add xiehuacheng/skills              # 装全部 11 个
+npx skills add xiehuacheng/skills              # 装全部
 npx skills add xiehuacheng/skills -s hot-skills # 只装某一个
 npx skills add xiehuacheng/skills -l           # 先看有哪些
 ```
@@ -26,11 +26,11 @@ npx skills add xiehuacheng/skills -l           # 先看有哪些
 
 按仓库子目录组织，每个分类有自己的 README：
 
-- **[wiki/](./skills/wiki/README.md)** — 知识库与笔记（1 skill）
-- **[skill-ecosystem/](./skills/skill-ecosystem/README.md)** — Skill 工程工具（4 skills）
-- **[career/](./skills/career/README.md)** — 求职与简历（2 skills）
-- **[github/](./skills/github/README.md)** — GitHub 数字资产（1 skill）
-- **[workflow/](./skills/workflow/README.md)** — 工作流与目标管理（3 skills）
+- **[wiki/](./skills/wiki/README.md)** — 知识库与笔记
+- **[skill-ecosystem/](./skills/skill-ecosystem/README.md)** — Skill 工程工具
+- **[career/](./skills/career/README.md)** — 求职与简历
+- **[github/](./skills/github/README.md)** — GitHub 数字资产
+- **[workflow/](./skills/workflow/README.md)** — 工作流与目标管理
 
 > 分类是**仓库结构选择**，对 `npx skills add` 命令无影响——CLI 递归扫 SKILL.md。
 
