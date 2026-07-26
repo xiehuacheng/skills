@@ -17,29 +17,36 @@
 
 ## 安装
 
-对 agent 说一句话即可安装：
+最简单的方式——让 agent 帮你跑安装命令（自然语言格式，`@<name>` 是给 agent 看的）：
 
 ```text
-帮我安装这个仓库下的所有 skill： xiehuacheng/skills@hot-skills
+帮我从这个仓库安装 skill：xiehuacheng/skills
 ```
 
-或者
+只装某一个：
 
 ```text
-帮我从这个仓库安装 skill： xiehuacheng/skills@hot-skills
-只安装：（你想要安装的 skill 名称）
+帮我从这个仓库安装 skill：xiehuacheng/skills
+只装 hot-skills
 ```
 
-或直接使用 [skills.sh](https://skills.sh/) CLI：
+或者直接用 [skills.sh](https://skills.sh/) CLI（这是真的命令行，`-s` 后跟 SKILL.md frontmatter 里的 `name` 字段）：
 
 ```bash
-npx skills add xiehuacheng/skills@hot-skills
+# 装全部 11 个
+npx skills add xiehuacheng/skills
+
+# 只装某一个
+npx skills add xiehuacheng/skills -s hot-skills
+
+# 先看有哪些，不装
+npx skills add xiehuacheng/skills -l
 ```
 
-本地测试时也可以直接指定路径：
+本地测试可以直接传本地路径：
 
 ```bash
-npx skills add /path/to/skills@hot-skills
+npx skills add /path/to/skills -s hot-skills
 ```
 
 ## 按分类浏览
@@ -54,13 +61,7 @@ Skill 按主题领域归入 5 个子目录：
 | [`github/`](./skills/github) | GitHub 数字资产 | `github-asset-manager` |
 | [`workflow/`](./skills/workflow) | 工作流与目标管理 | `ask-for-tools`、`effort-audit`、`go-goal-go` |
 
-> 旧的扁平结构下，单个 skill 的安装路径需要带子目录，例如：
->
-> ```bash
-> npx skills add xiehuacheng/skills@skill-ecosystem/unified-skill-pool
-> ```
->
-> 仓库根的 `xiehuacheng/skills@hot-skills` 仍然指向 [`hot-skills`](./skills/skill-ecosystem/hot-skills) 这一个 skill 的最新提示词。
+> 分类是**仓库结构选择**，对安装命令无影响。`npx skills add` 会递归扫整个 repo 找 `SKILL.md`，子目录对它透明。上面 `## 安装` 节的命令直接用就行，不需要改路径。
 
 ## Skill 介绍
 
