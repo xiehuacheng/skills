@@ -124,38 +124,11 @@ The skill has three flows, all built on the same script set. Use the flow that m
 ## Expected outputs
 
 - **detect.sh:** JSON list of harnesses with their skill dir paths and current item counts.
-- **merge.sh:** JSON report with `dry_run` boolean; when `true`, lists `would_move` / `would_conflict` / `would_backup_paths` and performs no actions. When `false` (via `--apply`), lists actual `moved` / `conflicts` plus `backup_path`. Also updates `.manifest.json` in canonical for each moved skill.
+- **merge.sh:** JSON report with `dry_run` boolean; when `true`, lists `would_move` / `would_conflict` / `would_backup_paths` and performs no actions. When `false` (via `--apply`), lists actual `moved` / `conflicts` plus `backup_path`.
 - **symlink.sh:** Per-harness pass/fail with the symlink target.
-- **verify.sh:** Human-readable table of every harness plus symlink health. Also refreshes `current_harnesses` for every manifest entry, and reports drift (skills in pool without a manifest entry, or manifest entries without a matching skill in the pool).
-- **install-skill.sh:** Confirmation of the new skill's path in canonical and that every harness can list it. Accepts `--upstream <owner/repo>` to record the external source repo. Updates `.manifest.json`.
+- **verify.sh:** Human-readable table of every harness plus symlink health.
+- **install-skill.sh:** Confirmation of the new skill's path in canonical and that every harness can list it.
 - **add-harness.sh:** Confirmation of the new symlink and the verified harness count.
-
-## Provenance tracking (`.manifest.json`)
-
-`~/.agents/skills/.manifest.json` records where each skill came from. Layout:
-
-```json
-{
-  "version": 1,
-  "generated_at": "2026-07-26T12:11:08Z",
-  "skills": {
-    "brainstorming": {
-      "name": "brainstorming",
-      "first_seen_harness": "kimi-code",
-      "first_seen_at": "2026-07-11T14:47:00Z",
-      "upstream": null,
-      "current_harnesses": ["claude-code", "codex", "kimi-code", ...]
-    }
-  }
-}
-```
-
-- `first_seen_harness` is set by `merge.sh` from the harness that originally moved the skill into canonical.
-- `first_seen_at` is set at the same moment and never overwritten.
-- `upstream` is set by `install-skill.sh --upstream <owner/repo>` (e.g. `obra/superpowers`, `anthropics/skills`). `merge.sh` does not know the upstream repo, so it leaves this `null`.
-- `current_harnesses` is recomputed by `verify.sh` from the live symlink state on every run.
-
-`verify.sh` reports drift: skills in the pool with no manifest entry, and manifest entries with no matching skill. Both are warnings, not errors, but the user should reconcile them. The file is auto-managed by the scripts — do not edit by hand unless you are bootstrapping a new pool.
 
 ## Error handling
 
