@@ -4,8 +4,6 @@
 
 > Agent Skills 技能集合 — 把各领域经验打包成可复用的 AI 能力。
 
-我自己用、顺便分享出去的工具集。每个 skill 解决一个具体问题，不是 vibe coding 的产物。
-
 ![GitHub top language](https://img.shields.io/github/languages/top/xiehuacheng/skills) ![GitHub Repo stars](https://img.shields.io/github/stars/xiehuacheng/skills?style=social) ![GitHub forks](https://img.shields.io/github/forks/xiehuacheng/skills?style=social) ![GitHub License](https://img.shields.io/github/license/xiehuacheng/skills) ![GitHub Issues](https://img.shields.io/github/issues/xiehuacheng/skills) ![GitHub last commit](https://img.shields.io/github/last-commit/xiehuacheng/skills)
 
 ## 安装
