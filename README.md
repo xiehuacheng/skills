@@ -8,14 +8,6 @@
 
 ![GitHub top language](https://img.shields.io/github/languages/top/xiehuacheng/skills) ![GitHub Repo stars](https://img.shields.io/github/stars/xiehuacheng/skills?style=social) ![GitHub forks](https://img.shields.io/github/forks/xiehuacheng/skills?style=social) ![GitHub License](https://img.shields.io/github/license/xiehuacheng/skills) ![GitHub Issues](https://img.shields.io/github/issues/xiehuacheng/skills) ![GitHub last commit](https://img.shields.io/github/last-commit/xiehuacheng/skills)
 
-## 目录
-
-- [安装](#安装)
-- [分类浏览](#分类浏览)
-- [我做的这堆 skill 是为了解决](#我做的这堆-skill-是为了解决)
-- [贡献](#贡献)
-- [许可证](#许可证)
-
 ## 安装
 
 用 [skills.sh](https://skills.sh/) CLI：
