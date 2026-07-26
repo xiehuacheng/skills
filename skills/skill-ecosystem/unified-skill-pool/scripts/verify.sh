@@ -67,7 +67,7 @@ fi
 CANONICAL_ABS=$(cd "$CANONICAL" 2>/dev/null && pwd || echo "$CANONICAL")
 
 python3 - "$HARNESS_JSON" "$CANONICAL_ABS" "$ADDL_HARNESS_JSON" <<'PY'
-import json, os, sys
+import json, os, sys, datetime
 harness_list = json.loads(sys.argv[1])
 canonical = sys.argv[2]
 addl_raw = sys.argv[3]
@@ -118,13 +118,77 @@ for h in merged:
     label = "{}".format(name) if h in harness_list else "{}+".format(name)
     print("{:<18} {:<16} {:>6}  {}".format(label, state, items, path))
 
+# --- Manifest maintenance + drift check ---
+# Scoped to canonical, only when it exists.
+manifest_drift = 0
+if canonical_exists:
+    manifest_path = os.path.join(canonical, ".manifest.json")
+    manifest = {"version": 1, "generated_at": "", "skills": {}}
+    if os.path.isfile(manifest_path):
+        try:
+            with open(manifest_path, "r", encoding="utf-8") as f:
+                manifest = json.load(f)
+        except Exception as e:
+            print(f"\n[WARN] Could not read {manifest_path}: {e}")
+            manifest = {"version": 1, "generated_at": "", "skills": {}}
+    manifest_skills = set(manifest.get("skills", {}).keys())
+
+    # Actual skills in canonical (dirs with SKILL.md; ignore hidden / helper files)
+    actual_skills = set()
+    for entry in os.scandir(canonical):
+        if not entry.is_dir():
+            continue
+        if entry.name.startswith("."):
+            continue
+        if entry.name == "skills-sync.sh":
+            continue
+        if os.path.isfile(os.path.join(entry.path, "SKILL.md")):
+            actual_skills.add(entry.name)
+
+    # Update current_harnesses for every manifest entry that exists in the pool.
+    # (This is the only field verify.sh auto-writes; first_seen_*, upstream are
+    # set by merge.sh / install-skill.sh / human, never overwritten by verify.)
+    harness_path_by_name = {h["name"]: h["path"] for h in merged}
+    for skill_name in manifest_skills & actual_skills:
+        visible = []
+        for hname, hpath in harness_path_by_name.items():
+            if os.path.isdir(hpath) and os.path.isdir(os.path.join(hpath, skill_name)):
+                visible.append(hname)
+        manifest["skills"][skill_name]["current_harnesses"] = sorted(visible)
+
+    # Drift report
+    untracked = sorted(actual_skills - manifest_skills)
+    orphan = sorted(manifest_skills - actual_skills)
+    if untracked:
+        manifest_drift += len(untracked)
+        print(f"\n[WARN] {len(untracked)} untracked skill(s) in pool (no manifest entry):")
+        for s in untracked:
+            print(f"  - {s}")
+    if orphan:
+        manifest_drift += len(orphan)
+        print(f"\n[WARN] {len(orphan)} orphan manifest entry/entries (no SKILL.md in pool):")
+        for s in orphan:
+            print(f"  - {s}")
+
+    # Refresh timestamp and write manifest atomically
+    manifest["generated_at"] = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    tmp_path = manifest_path + ".tmp"
+    try:
+        with open(tmp_path, "w", encoding="utf-8") as f:
+            json.dump(manifest, f, indent=2, ensure_ascii=False)
+            f.write("\n")
+        os.replace(tmp_path, manifest_path)
+    except Exception as e:
+        print(f"\n[WARN] Failed to write {manifest_path}: {e}")
+
 print()
-if broken == 0 and canonical_exists:
+if broken == 0 and canonical_exists and manifest_drift == 0:
     print("All {} harness paths healthy. Pooled: {}. Real-dirs: {}. Absent: {}. Broken: {}.".format(
         len(merged), state_counts["pooled"], state_counts["real-dir"],
         state_counts["absent"], state_counts["broken-symlink"]))
     sys.exit(0)
 else:
-    print("{} issue(s) found. See references/troubleshooting.md for recovery steps.".format(broken))
-    sys.exit(1 if broken > 0 else 2)
+    issues = broken + manifest_drift
+    print("{} issue(s) found. See references/troubleshooting.md for recovery steps.".format(issues))
+    sys.exit(1 if (broken > 0 or manifest_drift > 0) else 2)
 PY

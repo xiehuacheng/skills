@@ -146,6 +146,51 @@ while IFS= read -r hjson; do
   fi
 done < <(echo "$HARNESS_JSON" | python3 -c 'import json,sys; [print(json.dumps(h)) for h in json.load(sys.stdin)]')
 
+# 2.5 Update .manifest.json: for each successfully moved skill, add an entry
+#     (or leave existing entries untouched — preserve first_seen_*).
+if [[ ${#moved[@]} -gt 0 ]]; then
+  NOW=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+  python3 - "$CANONICAL" "$NOW" "${moved[@]}" <<'PY'
+import json, os, sys
+canonical, now = sys.argv[1], sys.argv[2]
+moved = sys.argv[3:]
+manifest_path = os.path.join(canonical, ".manifest.json")
+manifest = {"version": 1, "generated_at": now, "skills": {}}
+if os.path.isfile(manifest_path):
+    try:
+        with open(manifest_path, "r", encoding="utf-8") as f:
+            manifest = json.load(f)
+    except Exception:
+        pass
+manifest.setdefault("skills", {})
+for entry in moved:
+    if "/" not in entry:
+        continue
+    hname, name = entry.split("/", 1)
+    existing = manifest["skills"].get(name)
+    if existing:
+        # Preserve first_seen_*. Do not overwrite.
+        continue
+    manifest["skills"][name] = {
+        "name": name,
+        "first_seen_harness": hname,
+        "first_seen_at": now,
+        "upstream": None,
+        # current_harnesses is left for verify.sh to fill.
+        "current_harnesses": [],
+    }
+manifest["generated_at"] = now
+tmp_path = manifest_path + ".tmp"
+try:
+    with open(tmp_path, "w", encoding="utf-8") as f:
+        json.dump(manifest, f, indent=2, ensure_ascii=False)
+        f.write("\n")
+    os.replace(tmp_path, manifest_path)
+except Exception as e:
+    print(f"[WARN] Failed to update {manifest_path}: {e}", file=sys.stderr)
+PY
+fi
+
 # 3. Build JSON report
 python3 - "$moved" "$skipped" "$conflicts" "$BACKUP" "$CONFLICT_DIR" <<'PY'
 import json, sys
