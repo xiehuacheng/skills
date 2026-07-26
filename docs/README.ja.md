@@ -41,7 +41,6 @@ npx skills add xiehuacheng/skills -l           # 一覧を見る（インスト�
 - 新しい skill を書きたいがどこから始めればよいか分からない → [creating-skills](../skills/skill-ecosystem/creating-skills)
 - 今どんな skill が流行しているか知りたい → [hot-skills](../skills/skill-ecosystem/hot-skills)
 - 多言語の SKILL.md を保守したい → [skill-translator](../skills/skill-ecosystem/skill-translator)
-- Claude / Codex / Kimi を併用していて、skill ディレクトリが散らばっている → [unified-skill-pool](../skills/skill-ecosystem/unified-skill-pool)
 
 **ワークフローと方向性**
 

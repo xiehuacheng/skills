@@ -41,7 +41,6 @@ Skills are grouped by topic; each category has its own README:
 - Want to write a new skill but don't know where to start → [creating-skills](../skills/skill-ecosystem/creating-skills)
 - Don't know what skills are trending now → [hot-skills](../skills/skill-ecosystem/hot-skills)
 - Need to maintain a multilingual SKILL.md → [skill-translator](../skills/skill-ecosystem/skill-translator)
-- Using Claude / Codex / Kimi at once, skill dirs scattered everywhere → [unified-skill-pool](../skills/skill-ecosystem/unified-skill-pool)
 
 **Workflow & direction**
 

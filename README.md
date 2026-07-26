@@ -41,7 +41,6 @@ npx skills add xiehuacheng/skills -l           # 先看有哪些
 - 想写新 skill 但不知从哪下手 → [creating-skills](./skills/skill-ecosystem/creating-skills)
 - 不知道现在流行什么 skill → [hot-skills](./skills/skill-ecosystem/hot-skills)
 - 要维护多语言 SKILL.md → [skill-translator](./skills/skill-ecosystem/skill-translator)
-- 同时用 Claude / Codex / Kimi 多套 agent，skill 目录到处复制 → [unified-skill-pool](./skills/skill-ecosystem/unified-skill-pool)
 
 **工作流与方向**
 
