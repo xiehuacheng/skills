@@ -2,138 +2,63 @@
 
 # skills
 
-> Agent Skills コレクション。各領域の経験を再利用可能な AI 能力にパッケージ化します | A collection of Agent Skills that turn AI agents into reusable domain experts.
+> Agent Skills コレクション — 各領域の経験を再利用可能な AI 能力としてパッケージ化。
 
 ![GitHub top language](https://img.shields.io/github/languages/top/xiehuacheng/skills) ![GitHub Repo stars](https://img.shields.io/github/stars/xiehuacheng/skills?style=social) ![GitHub forks](https://img.shields.io/github/forks/xiehuacheng/skills?style=social) ![GitHub License](https://img.shields.io/github/license/xiehuacheng/skills) ![GitHub Issues](https://img.shields.io/github/issues/xiehuacheng/skills) ![GitHub last commit](https://img.shields.io/github/last-commit/xiehuacheng/skills)
 
-## 目次
-
-- [インストール](#インストール)
-- [Skill 紹介](#skill-紹介)
-  - [クイック索引](#クイック索引)
-- [貢献](#貢献)
-- [ライセンス](#ライセンス)
-
 ## インストール
 
-エージェントに一言話すだけでインストールできます：
-
-```text
-このリポジトリのすべての skill をインストールしてください： xiehuacheng/skills@hot-skills
-```
-
-または
-
-```text
-このリポジトリから skill をインストールしてください： xiehuacheng/skills@hot-skills
-インストール対象：（インストールしたい skill 名）
-```
-
-または [skills.sh](https://skills.sh/) CLI を直接使用：
+[skills.sh](https://skills.sh/) CLI を使用：
 
 ```bash
-npx skills add xiehuacheng/skills@hot-skills
+npx skills add xiehuacheng/skills              # 全部インストール
+npx skills add xiehuacheng/skills -s hot-skills # 一つだけインストール
+npx skills add xiehuacheng/skills -l           # 一覧を見る（インストールしない）
 ```
 
-ローカルでテストする際は、直接パスを指定することもできます：
+エージェントに依頼する場合：
 
-```bash
-npx skills add /path/to/skills@hot-skills
+```
+このリポジトリから skill をインストールしてください：xiehuacheng/skills
 ```
 
-## Skill 紹介
+## 分類別
 
-### クイック索引
+トピックごとに分類されており、各分類に独自の README があります：
 
-| Skill | 一言説明 | 典型的なシーン |
-|-------|-----------|---------|
-| [`creating-skills`](../skills/creating-skills) | Agent Skill の作成・改善・検証 | 新しい skill を書きたい |
-| [`hot-skills`](../skills/hot-skills) | 今人気の Agent Skills を発見 | 今何が流行っているか知りたい |
-| [`skill-translator`](../skills/skill-translator) | skill の `SKILL.md` を多言語間で翻訳 | 多言語 skill を保守する |
-| [`effort-audit`](../skills/effort-audit) | 現在のタスクが長期方向から外れていないか確認 | この作業が価値あるか確認したい |
-| [`go-goal-go`](../skills/go-goal-go) | 検証可能な `/goal` 目標を作成 | 多ターンタスクを agent に自動実行させたい |
-| [`ask-for-tools`](../skills/ask-for-tools) | agent がツール境界にぶつかったときにツールを要求 | agent にツールや権限が足りないとき |
-| [`github-asset-manager`](../skills/github-asset-manager) | GitHub Stars・リポジトリ・README を整理 | GitHub のデジタル資産を管理する |
-| [`cv-builder`](../skills/cv-builder) | プロジェクト・GitHub・旧履歴書から技術職の履歴書/CV を生成 | 履歴書を書く・更新する |
-| [`cv-clone`](../skills/cv-clone) | 目標履歴書のレイアウト・スタイルを複製し、編集可能な LaTeX テンプレートを生成 | 参考にしたいサンプルと同じ体裁の履歴書を作りたい |
-| [`init-llm-wiki`](../skills/init-llm-wiki) | Karpathy スタイルの LLM Wiki を初期化・維持 | 新しい領域の wiki を作る |
+- **[wiki/](../skills/wiki/README.md)** — ナレッジベース・ノート
+- **[skill-ecosystem/](../skills/skill-ecosystem/README.md)** — Skill エンジニアリングツール
+- **[career/](../skills/career/README.md)** — 転職・履歴書
+- **[github/](../skills/github/README.md)** — GitHub デジタル資産
+- **[workflow/](../skills/workflow/README.md)** — ワークフロー・目標管理
 
-以下、各 skill の詳細を説明します。
+> 分類はリポジトリ構造の選択であり、`npx skills add` コマンドには影響しません — CLI は SKILL.md を再帰的にスキャンします。
 
-### hot-skills
+## これらの Skill が解決する問題
 
-[`hot-skills`](../skills/hot-skills) は、現在注目されている Agent Skill を発見するために使われます。複数のデータソースからの信号を集約します：
+**Skill エンジニアリング**
 
-- **[agentskills.media](https://agentskills.media)** — GitHub stars と分類
-- **skills-rank.com** — 単一 skill のランキングスコア
-- **skills.sh** — 実際のインストール数（ヘッドレスブラウザで公開ランキングを取得）
+- 新しい skill を書きたいがどこから始めればよいか分からない → [creating-skills](../skills/skill-ecosystem/creating-skills)
+- 今どんな skill が流行しているか知りたい → [hot-skills](../skills/skill-ecosystem/hot-skills)
+- 多言語の SKILL.md を保守したい → [skill-translator](../skills/skill-ecosystem/skill-translator)
+- Claude / Codex / Kimi を併用していて、skill ディレクトリが散らばっている → [unified-skill-pool](../skills/skill-ecosystem/unified-skill-pool)
 
-カテゴリやエイリアスによる絞り込み、キーワード検索、24 時間のトレンドランキングの確認、JSON 出力に対応しています。また、`owner/repo@skill-name` で正確に重複を排除し、複数ソースの指標を統合します。「今、人気の skill は何？」「フロントエンドで人気の skill は何？」といった質問に答えるのに適しています。
+**ワークフローと方向性**
 
-### init-llm-wiki
+- 新しいタスクが脱線して進められなくなった → [effort-audit](../skills/workflow/effort-audit)
+- 多ターンタスクで「完了」の判断がつかない → [go-goal-go](../skills/workflow/go-goal-go)
+- agent にツールがなくて無理に進めている → [ask-for-tools](../skills/workflow/ask-for-tools)
 
-[`init-llm-wiki`](../skills/init-llm-wiki) は、新しい領域向けに Karpathy スタイルの LLM Wiki を迅速に立ち上げ、維持することを支援します。
+**個人成果物**
 
-Google Cloud Open Knowledge Format（OKF）v0.1 に準拠し、Obsidian 優先で動作します：`00-Raw/`、`01-Wiki/`、`02-Areas/`（または `02-Module/`）ディレクトリを自動生成し、ルートの `index.md`、`log.md`、agent schema ドキュメントを作成し、frontmatter と `[[wikilink]]` リンク規約を統一します。Ingest フローでは、まずユーザーと主要な学びについて議論し、次にページ構成を計画することを重視し、キュレーションをバッチ処理にしないようにします。
-
-### github-asset-manager
-
-[`github-asset-manager`](../skills/github-asset-manager) は、GitHub のデジタル資産を整理し、改善するために使われます。
-
-GitHub CLI または `GITHUB_TOKEN` を使ってデータを読み取り、複数のローカル分析コマンドを提供します：GitHub Stars の分析と分類、個人リポジトリの健全性監査、GitHub Profile README の生成、リポジトリ README の潤色、多言語 README の生成、指定リポジトリの description と topics の補完、Stars を GitHub Lists に整理する機能です。使用時はまず認証と権限 scope を確認し、生成した内容をユーザーに提示します。すべての書き込み操作（About の更新、README のプッシュ、Star Lists の適用など）にはユーザーの明示的な確認が必要で、デフォルトでは構造化された Markdown レポートのみを出力します。
-
-### cv-builder
-
-[`cv-builder`](../skills/cv-builder) は、技術職の履歴書や CV を作成するために使われます。
-
-ローカルプロジェクト、GitHub リポジトリ、既存の履歴書ファイル、またはプレーンテキストのメモから材料を収集し、sub agent を使って並列に読み取り、プロジェクトのハイライトを抽出します。その後、ユーザーに個人情報、キャリア目標、経歴、スキルなどを確認させ、最終的に Markdown 草稿を生成して HTML/PDF にレンダリングします。modern、classic、minimal などの組み込みテンプレートに加え、カスタムテンプレートやユーザーの説明に基づいて agent が生成するスタイルにも対応しています。
-
-### cv-clone
-
-[`cv-clone`](../skills/cv-clone) は、目標の履歴書・CV サンプルの視覚レイアウトを複製し、編集可能な LaTeX テンプレートを出力します。
-
-サンプル履歴書（PDF またはスクリーンショット）を与えると、`tectonic` / `xelatex` ベースのコンパイル可能な LaTeX テンプレートを生成し、`\newcommand` プレースホルダを備えます。デフォルトでは実データを事前入力せず、まずテンプレートを生成してユーザーに確認を取り、明示的に承認を得てから入力ワークフローを開きます。macOS を主ターゲットとしつつ、`SKILL.md` で Linux / Windows の `apt` / `scoop` 手順も案内します。この skill は独立して動作し、本リポジトリの他 skill に依存・連携しません。
-
-**v0.3.0** — 未実装の Route A/C と cv-builder 統合の記述を削除（各 skill は独立を維持）。`SKILL.md` + `references/` 合計を 3509 → 1765 語（−50%）に縮小。
-
-**v0.4.0** — 標準の Can do / Cannot do / Default 宣言を追加（内容の境界、書き込みの gate、デフォルトの dry-preview 動作）。
-ローカルプロジェクト、GitHub リポジトリ、既存の履歴書ファイル、またはプレーンテキストのメモから材料を収集し、sub agent を使って並列に読み取り、プロジェクトのハイライトを抽出します。その後、ユーザーに個人情報、キャリア目標、経歴、スキルなどを確認させ、最終的に Markdown 草稿を生成して HTML/PDF にレンダリングします。modern、classic、minimal などの組み込みテンプレートに加え、カスタムテンプレートやユーザーの説明に基づいて agent が生成するスタイルにも対応しています。
-
-### creating-skills
-
-[`creating-skills`](../skills/creating-skills) は、Agent Skill の作成、改善、検証に使われます。
-
-協働型のブレインストーミングを通じて、skill のシナリオ、トリガーとなるタイミング、範囲を明確にし、それぞれの重要なポイントでユーザーに確認を求め、承認前に最も脆弱な仮定を積極的に突きます。SKILL.md とディレクトリ構造の生成に加え、以下を重視します：まずインストール場所を確認すること、能力の境界とデフォルト動作を明確に宣言すること、skill を使う agent 向けに実行チェックリストと対話モードを提供すること、SKILL.md にユーザーの承認ポイントと期待される出力例を記載すること、そして `quick_validate.py` と sub-agent によるエンドツーエンドテストで skill の品質を検証することです。
-
-**v1.7.0** — 原則 #10「Measure the outcome, not the activity」と Step 5 の anti-pattern 3 件を追加：Splitting to fake-shrink（総量を減らさずに references/ へ移動する）、Documenting unimplemented routes（コードにない機能を記述する）、Embedding integration with other skills（他の skill との連携方法を記述する）。これらは「内容の移動」を「圧縮」と誤認した実セッションの観察から生まれたルールです。
-
-### effort-audit
-
-[`effort-audit`](../skills/effort-audit) は、現在のプロジェクトやタスクがユーザーの長期方向と一致しているかを自動的にチェックするために使われます。
-
-プロジェクト対話の開始時に、`~/.config/effort-audit/profile.md` の個人方向設定を自動的に読み込み、現在のタスクが逸脱しているかどうかを判断します。逸脱が中度以上の場合、具体的な理由を挙げて一時停止し、「続行」「方向を調整」「保留」などのオプションを提供し、ユーザーの精力を主攻領域に戻すのを助けます。初回使用時には、一次性のインタビューで個人方向設定を生成します。
-
-### ask-for-tools
-
-[`ask-for-tools`](../skills/ask-for-tools) は、agent がツール境界に遭遇した際に、無理に進めるのではなくユーザーにツールを要求するために使われます。
-
-新しいタスクの開始時や実行中に行き詰まった際にトリガーされ、まずツールが既に存在するかどうかを自己チェックします。存在しない場合、その理由と代替案、そして「ツールを提供する / 降格して試す / タスクを停止する」の 3 つのオプションをユーザーに明確に説明します。MCP server、CLI ツール、Python/Node パッケージ、API キー、システム権限、ローカルファイルなどのシーンに対応します。
-
-### go-goal-go
-
-[`go-goal-go`](../skills/go-goal-go) は、明確な終了状態、証拠、境界、停止ルールを持つ検証可能な `/goal` 目標を作成するのを手伝うために使われます。
-
-タスクが反復的・検証可能・範囲限定である場合に積極的に goal モードを提案し、自律的に多ターン実行できる目標を作成します。ユーザーが明示的に指定した skill やシステムツールをループ内で使うように宣言することもできます。goal モードに向かないタスクには、はっきりとした理由を説明して正直に反論します。
-
-### skill-translator
-
-[`skill-translator`](../skills/skill-translator) は、skill の `SKILL.md` を多言語間で翻訳するために使われます。
-
-中国語（`zh-CN`）と英語（`en`）を中心に、自然言語での翻訳依頼から対象 skill と目標言語を特定し、ソース言語を自動検出して、コードブロック・ファイルパス・コマンド名・技術識別子・URL など翻訳できない要素を保持しながら本文を翻訳します。翻訳後は `scripts/quick_validate.py` で SKILL.md を検証し、ユーザー承認の上で元のファイルを上書きします。新規 skill の作成や README など `SKILL.md` 以外のファイルの翻訳は扱いません。
+- 技術職の履歴書を書きたい・更新したい → [cv-builder](../skills/career/cv-builder)
+- 参考にしたい履歴書と同じレイアウトにしたい → [cv-clone](../skills/career/cv-clone)
+- GitHub Stars が乱雑 / リポジトリの README が未執筆 → [github-asset-manager](../skills/github/github-asset-manager)
+- 新しい領域の Karpathy 風 wiki を立ち上げたい → [init-llm-wiki](../skills/wiki/init-llm-wiki)
 
 ## 貢献
 
-新しい skill の追加や既存 skill の改善を歓迎します。各 skill は `skills/<skill-name>/` ディレクトリに個別に配置し、`SKILL.md` 説明ファイルを含めてください。
+新しい skill や改善を歓迎します。各 skill は対応するトピックサブディレクトリに配置してください（例：`skills/wiki/<skill-name>/`）。SKILL.md を含めてください。新しいトピックの場合は、新しいサブディレクトリを作成してください。
 
 ## ライセンス
 
