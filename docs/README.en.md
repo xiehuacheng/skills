@@ -44,7 +44,7 @@ Skills are grouped by topic; each category has its own README:
 
 **Workflow & direction**
 
-- New task is drifting off, can't keep going → [effort-audit](../skills/workflow/effort-audit)
+- Want to start something new but haven't thought it through, or feel you're drifting → [think-twice](../skills/workflow/think-twice)
 - Multi-turn task with no clear "done" signal → [go-goal-go](../skills/workflow/go-goal-go)
 - Agent missing a tool, pushing through anyway → [ask-for-tools](../skills/workflow/ask-for-tools)
 

@@ -44,7 +44,7 @@ npx skills add xiehuacheng/skills -l           # 一覧を見る（インスト�
 
 **ワークフローと方向性**
 
-- 新しいタスクが脱線して進められなくなった → [effort-audit](../skills/workflow/effort-audit)
+- 新しいことを始めたいが考えがまとまっていない、あるいは脱線している気がする → [think-twice](../skills/workflow/think-twice)
 - 多ターンタスクで「完了」の判断がつかない → [go-goal-go](../skills/workflow/go-goal-go)
 - agent にツールがなくて無理に進めている → [ask-for-tools](../skills/workflow/ask-for-tools)
 

@@ -44,7 +44,7 @@ npx skills add xiehuacheng/skills -l           # 先看有哪些
 
 **工作流与方向**
 
-- 新任务跑偏了想做不下去 → [effort-audit](./skills/workflow/effort-audit)
+- 想弄点新东西但还没想清楚，或感觉跑偏了 → [think-twice](./skills/workflow/think-twice)
 - 多轮任务不知道啥时候算完 → [go-goal-go](./skills/workflow/go-goal-go)
 - agent 缺工具自己硬扛 → [ask-for-tools](./skills/workflow/ask-for-tools)
 
